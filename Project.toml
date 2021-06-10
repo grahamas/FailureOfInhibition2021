@@ -1,5 +1,12 @@
 name = "FailureOfInhibition2021"
+
+[deps]
+AxisIndices = "f52c9ee2-1b1c-4fd8-8546-6350938c7f11"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+NeuralModels = "a199b2c4-7a51-11e9-2fe1-b9a1a5fe2912"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
+UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
+
 [compat]
 julia = "1.6.1"
-[deps]
-DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
