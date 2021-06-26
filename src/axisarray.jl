@@ -19,10 +19,11 @@ end
 EnumerateNAA(naa) = EnumerateNAA(naa, zip(Iterators.product(axes_keys(naa)...), naa))
 Base.length(e::EnumerateNAA) = length(e.naa)
 
-function enumerate_nt(naa::NamedAxisArray{X}) where X
+function enumerate_naa(naa::NamedAxisArray{X}) where X
     EnumerateNAA(naa)
 end
 
+# returns NamedTuple key nt, and corresponding val (naa[; nt...] == val)
 function Base.iterate(enaa::EnumerateNAA, state)
     ((tup, val), state) = @ifsomething iterate(enaa.inner_iter, state)
     nt = nt_coord(enaa.naa, tup)
