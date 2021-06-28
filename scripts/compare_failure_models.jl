@@ -40,50 +40,28 @@ results = fit_range_of_thresholds(;
     μ_off=μ_off, σ_off=σ_off
 )
 
-# model_names = typeof(results[begin][1]).parameters[1]
-# high_gain_results = results[σ_off=σ_off[begin], σ_on=σ_on[begin]]
-# low_gain_results = results[σ_off=σ_off[end], σ_on=σ_on[end]]
-# wide_hg_off_results = results[μ_off=μ_off[end], σ_off=σ_off[begin]]
-# narrow_hg_off_results = results[μ_off=μ_off[begin], σ_off=σ_off[begin]] # varies σ_on
+# surplus_plots_nt = surplus_error_vs_differences(results, μ_on,
+#     [:μ_off => (off -> off - μ_on) => "μ(off) - μ(on)"]
+# )
 
+# plot_title_map = (
+#     surplus_mse="MSE(Gaussian) - MSE(DoS)", 
+#     surplus_μ_on_error="ε(μ_on)(Gaussian) - ε(μ_on)(DoS)",
+#     surplus_σ_on_error="ε(σ_on)(Gaussian) - ε(σ_on)(DoS)",
+#     surplus_μ_off_error="ε(μ_off)(Gaussian) - ε(μ_off)(DoS)",
+#     surplus_σ_off_error="ε(σ_off)(Gaussian) - ε(σ_off)(DoS)"
+# )
 
-# vector_plot_models(high_gain_results, model_names; title="High gain both: off $(σ_off[begin]), on:$(σ_on[begin])")
-# vector_plot_models(low_gain_results, model_names; title="Low gain both: off $(σ_off[end]), on $(σ_on[end])")
-# vector_plot_models(wide_hg_off_results, model_names; title="Wide HG Off: θ_off $(μ_off[end]), σ_off $(σ_off[begin])")
-# vector_plot_models(narrow_hg_off_results, model_names; title="Narrow HG Off: θ_off $(μ_off[begin]), σ_off $(σ_off[begin])")
-
-# df = results_axisarray_to_df(results; model_names=[:my, :meijer])
-# plts = fit_vs_differences(df; μ_on=μ_on)
-# for i in 1:length(plts)
-#     fig = Figure()
-#     draw!(fig[1,1], plts[i])
-#     display(fig)    
+# with_theme(nullcline_theme) do
+# for name in keys(surplus_plots_nt)
+#     fig = Figure(title=string(name))
+#     drawn_fig = draw!(fig[1,1], surplus_plots_nt[name])
+#     #Colorbar(fig[1,2], only(drawn_fig[1,1].axis.scene.plots))
+#     Makie.Axis(first(drawn_fig)).title[] = string(plot_title_map[name])
+#     Makie.Axis(first(drawn_fig)).xticklabelrotation[] = π/2
+#     display(fig)
 # end
-
-# df
-surplus_plots_nt = surplus_error_vs_differences(results, μ_on)
-
-with_theme(nullcline_theme) do
-for name in keys(surplus_plots_nt)
-    fig = Figure(title=string(name))
-    drawn_fig = draw!(fig[1,1], surplus_plots_nt[name]
-    #; 
-    # fontsize=30, (
-    #     backgroundcolor = :white,
-    #     leftspinevisible = true,
-    #     rightspinevisible = false,
-    #     bottomspinevisible = true,
-    #     topspinevisible = false,
-    #     xgridcolor = :white,
-    #     ygridcolor = :white,
-    #     ytickformat = xs -> abbrev_count_label.(xs)
-    # )...
-    )
-    Colorbar(fig[1,2], only(drawn_fig[1,1].axis.scene.plots))
-    Makie.Axis(first(drawn_fig)).title[] = string(name)
-    display(fig)
-end
-end
+# end
 
 surplus_plots_nt
 

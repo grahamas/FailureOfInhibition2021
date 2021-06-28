@@ -373,11 +373,13 @@ function err_visual(arr)
     visual(colorrange=(min(0., minimum(arr)), maximum(arr)))
 end
 
-function surplus_error_vs_differences(results::AbstractArray, μ_on)
-    axis_labels = (
-        :μ_difference => "|μ(off) - μ(on)|", 
-        :σ_difference => "|σ(off) - σ(on)|" 
-    )
+function surplus_error_vs_differences(results::AbstractArray, 
+        μ_on, 
+        axes = (
+            :μ_off => off -> abs(off - μ_on) => "|μ(off) - μ(on)|", 
+            (:σ_off, :σ_on) => (on, off) -> abs(off - on) => "|σ(off) - σ(on)|" 
+        )
+    )  
 
     # Surplus MSE
     surplus_mse_df = surplus_error_df(results, 
@@ -385,18 +387,14 @@ function surplus_error_vs_differences(results::AbstractArray, μ_on)
         res -> Optim.minimum(res.fits.meijer), res -> 0.,
         :surplus_mse
     )
-    surplus_mse_df.μ_difference = abs.(surplus_mse_df.μ_off .- μ_on)
-    surplus_mse_df.σ_difference = abs.(surplus_mse_df.σ_off .- surplus_mse_df.σ_on)
-    surplus_mse_plot = data(surplus_mse_df) * mapping(axis_labels..., :surplus_mse) * expectation() * err_visual(surplus_mse_df.surplus_mse)
+    surplus_mse_plot = data(surplus_mse_df) * mapping(axes..., :surplus_mse) * expectation() * err_visual(surplus_mse_df.surplus_mse)
     # Surplus σ_off
     surplus_σ_off_error_df = surplus_error_df(results, 
         res -> res.minimizing_p.my.σ_off, res -> res.samples.off.σ,
         res -> res.minimizing_p.meijer.σ_off, res -> res.samples.off.σ,
         :surplus_σ_off_error
     )
-    surplus_σ_off_error_df.μ_difference = abs.(surplus_σ_off_error_df.μ_off .- μ_on)
-    surplus_σ_off_error_df.σ_difference = abs.(surplus_σ_off_error_df.σ_off .- surplus_σ_off_error_df.σ_on)
-    surplus_σ_off_plot = data(surplus_σ_off_error_df) * mapping(axis_labels..., :surplus_σ_off_error) * expectation() * err_visual(surplus_σ_off_error_df.surplus_σ_off_error)
+    surplus_σ_off_plot = data(surplus_σ_off_error_df) * mapping(axes..., :surplus_σ_off_error) * expectation()# * err_visual(surplus_σ_off_error_df.surplus_σ_off_error)
 
     # Surplus σ_on
     surplus_σ_on_error_df = surplus_error_df(results, 
@@ -404,9 +402,7 @@ function surplus_error_vs_differences(results::AbstractArray, μ_on)
         res -> res.minimizing_p.meijer.σ_on, res -> res.samples.on.σ,
         :surplus_σ_on_error
     )
-    surplus_σ_on_error_df.μ_difference = abs.(surplus_σ_on_error_df.μ_off .- μ_on)
-    surplus_σ_on_error_df.σ_difference = abs.(surplus_σ_on_error_df.σ_off .- surplus_σ_on_error_df.σ_on)
-    surplus_σ_on_plot = data(surplus_σ_on_error_df) * mapping(axis_labels..., :surplus_σ_on_error) * expectation() * err_visual(surplus_σ_on_error_df.surplus_σ_on_error)
+    surplus_σ_on_plot = data(surplus_σ_on_error_df) * mapping(axes..., :surplus_σ_on_error) * expectation() * err_visual(surplus_σ_on_error_df.surplus_σ_on_error)
 
     # Surplus μ_off
     surplus_μ_off_error_df = surplus_error_df(results, 
@@ -414,9 +410,7 @@ function surplus_error_vs_differences(results::AbstractArray, μ_on)
         res -> res.minimizing_p.meijer.μ_off, res -> res.samples.off.μ,
         :surplus_μ_off_error
     )
-    surplus_μ_off_error_df.μ_difference = abs.(surplus_μ_off_error_df.μ_off .- μ_on)
-    surplus_μ_off_error_df.σ_difference = abs.(surplus_μ_off_error_df.σ_off .- surplus_μ_off_error_df.σ_on)
-    surplus_μ_off_plot = data(surplus_μ_off_error_df) * mapping(axis_labels..., :surplus_μ_off_error) * expectation() * err_visual(surplus_μ_off_error_df.surplus_μ_off_error)
+    surplus_μ_off_plot = data(surplus_μ_off_error_df) * mapping(axes..., :surplus_μ_off_error) * expectation() * err_visual(surplus_μ_off_error_df.surplus_μ_off_error)
 
     # Surplus μ_on
     surplus_μ_on_error_df = surplus_error_df(results, 
@@ -424,9 +418,7 @@ function surplus_error_vs_differences(results::AbstractArray, μ_on)
         res -> res.minimizing_p.meijer.μ_on, res -> res.samples.on.μ,
         :surplus_μ_on_error
     )
-    surplus_μ_on_error_df.μ_difference = abs.(surplus_μ_on_error_df.μ_off .- μ_on)
-    surplus_μ_on_error_df.σ_difference = abs.(surplus_μ_on_error_df.σ_off .- surplus_μ_on_error_df.σ_on)
-    surplus_μ_on_plot = data(surplus_μ_on_error_df) * mapping(axis_labels..., :surplus_μ_on_error) * expectation() * err_visual(surplus_μ_on_error_df.surplus_μ_on_error)
+    surplus_μ_on_plot = data(surplus_μ_on_error_df) * mapping(axes..., :surplus_μ_on_error) * expectation() * err_visual(surplus_μ_on_error_df.surplus_μ_on_error)
 
     return (surplus_mse=surplus_mse_plot, 
         surplus_μ_on_error=surplus_μ_on_plot,
