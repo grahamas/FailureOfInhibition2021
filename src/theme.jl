@@ -26,7 +26,7 @@ bar_theme = Theme(
     )
 )
 nullcline_theme = Theme(
-    fontsize=30,
+    fontsize=48,
     Axis = (
         backgroundcolor = :white,
         leftspinevisible = true,
@@ -37,18 +37,18 @@ nullcline_theme = Theme(
         ygridcolor = :white
     ),
     Lines = (
-        linewidth=5.0,
+        linewidth=7.0,
     ),
     Arrows = (
-        arrowsize=10, lengthscale=0.017,
+        arrowsize=20, lengthscale=0.017,
         linewidth=2,
         arrowcolor=:black, linecolor=:black,
         colormap=ColorSchemes.Greys_5,
         normalize=false
     ),
     Scatter = (
-        markersize=27,
-        strokewidth=1
+        markersize=50,
+        strokewidth=2
     ),
     Legend = (
         labelsize = 20,
