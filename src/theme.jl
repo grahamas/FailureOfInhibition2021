@@ -37,7 +37,7 @@ nullcline_theme = Theme(
         ygridcolor = :white
     ),
     Lines = (
-        linewidth=4.0,
+        linewidth=5.0,
     ),
     Arrows = (
         arrowsize=10, lengthscale=0.017,
@@ -49,5 +49,10 @@ nullcline_theme = Theme(
     Scatter = (
         markersize=27,
         strokewidth=1
+    ),
+    Legend = (
+        labelsize = 20,
+        textsize = 22,
+        linewidth=5.
     )
 )  

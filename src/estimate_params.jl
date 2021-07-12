@@ -2,6 +2,7 @@ using Base: sign_mask
 using Parameters
 using AlgebraOfGraphics, DataFrames
 
+
 abstract type NonlP{T} end
 @with_kw struct TwoSigmoidsP{T} <: NonlP{T}
     a_on::T
@@ -18,6 +19,23 @@ TwoSigmoidsP(vec::Vector{T}) where T = TwoSigmoidsP{T}(vec...)
 end
 Base.collect(p::GaussianP) = [p.μ, p.σ, p.A]
 GaussianP(vec::Vector{T}) where T = GaussianP{T}(vec...)
+
+
+function my_model(xs,p::TwoSigmoidsP)
+    difference_of_simple_sigmoids(xs,p.a_on,p.θ_on,p.a_off,p.θ_off)
+end
+function kim_model(xs,p::TwoSigmoidsP)
+    product_of_simple_sigmoids(xs,p.a_on,p.θ_on,p.a_off,p.θ_off)
+end
+function meijer_model(xs,p::GaussianP)
+    gaussian(xs,p.σ,p.μ,p.A)
+end
+
+const THREE_MODELS = (
+    my=my_model,
+    kim=kim_model,
+    meijer=meijer_model
+)
 
 # source: https://www.wolframcloud.com/env/ecd2d9d4-3c74-44d0-b066-760406ca3f72
 # personal mathematica notebook finding f'(μ + sqrt(2log(2))σ) 
@@ -82,14 +100,14 @@ fit_error(model_fit, data) = sqrt(mean(@. (model_fit - data)^2))
 
 # Generate off-on-off neurons with normally distributed thresholds, conditional on θ_on < θ_off. Returns (nt, n_discarded) where nt is a namedtuple of fits, and n_discarded says how many random neuron choices were discarded because θ_on >= θ_off
 function fit_normally_distributed_thresholds(
+        #models,
         μ_on::T, σ_on,
         μ_off, σ_off, 
-        N_neurons=1000, N_xs=1000,
-        N_sds_considered=5
+        N_neurons=1000, N_xs=2000,
+        # N_sds_considered=10
+        lower_bound=-2, upper_bound=2
     ) where T
     @assert μ_on < μ_off
-    lower_bound = min(μ_on - N_sds_considered * σ_on, μ_off - N_sds_considered * σ_off)
-    upper_bound = max(μ_on + N_sds_considered * σ_on, μ_off + N_sds_considered * σ_off)
     xs = range(lower_bound, upper_bound, length=N_xs)
 
     # FIXME no need to compute for all N_xs X N_neurons
@@ -155,7 +173,7 @@ function fit_normally_distributed_thresholds(
 
     my_model_fit = optimize(my_model_loss, my_model_guess, LBFGS(); autodiff=:forward)
     kim_model_fit = optimize(kim_model_loss, kim_model_guess, LBFGS(); autodiff=:forward)
-    meijer_model_fit = optimize(meijer_model_loss, meijer_model_guess, NelderMead())
+    meijer_model_fit = optimize(meijer_model_loss, meijer_model_guess, LBFGS(); autodiff=:forward)
 
     return (
         fits=(
@@ -178,7 +196,8 @@ function fit_normally_distributed_thresholds(
     )
 end
 
-@memoize function fit_range_of_thresholds(;
+@memoize function fit_range_of_thresholds(#models = THREE_MODELS
+    ;
         μ_on, σ_on,
         μ_off, σ_off, 
         kwargs...
@@ -186,7 +205,7 @@ end
     all_axes = (μ_on, σ_on,
                 μ_off, σ_off)
     all_axes_names = (:μ_on, :σ_on,
-                      :μ_off, :σ_off)
+            :μ_off, :σ_off)
     axes = filter(x -> typeof(x) <: AbstractArray, all_axes)
     axes_names = all_axes_names[(typeof.(all_axes) .<: AbstractArray) |> collect]
     off_on_off_parameters = product(
@@ -207,11 +226,11 @@ end
 
 end
 
-function vector_plot_models(results::AbstractVector, model_names; title="")
+function vector_plot_models(results::AbstractVector, model_names; models=THREE_MODELS, title="")
     vals = only(axes_keys(results))
     xlabel = string(only(AxisIndices.dimnames(results)))
     fig = Figure()
-    fig[1,1] = minimum_ax = Makie.Axis(fig; title="mse", xlabel=xlabel)
+    fig[1,1] = minimum_ax = Makie.Axis(fig; title="rmse", xlabel=xlabel)
     fig[2,1] = theta_on_ax = Makie.Axis(fig; title="|θ̂_on - μ̂_on|")
     fig[2,2] = theta_off_ax = Makie.Axis(fig; title="|θ̂_off - μ̂_off|")
     # fig[3,1] = a_on_ax = Makie.Axis(fig; title="|â_on - a(σ̂_on)|")
@@ -264,6 +283,17 @@ function vector_plot_models(results::AbstractVector, model_names; title="")
     Legend(fig[1,2], [last_example_lines..., true_last_example_line], [string.(plotted_names)..., "truth"], tellwidth=false, tellheight=false)
     supertitle = fig[0,:] = Label(fig, title)
     display(fig)
+end
+
+function plot_example_result!(ax::Makie.Axis, result, models=pairs(THREE_MODELS))
+    xs = result.xs
+    truth = result.truth
+    lines!(ax, xs, truth, color=:black)
+    ax.xlabel[] = "input"
+    ax.ylabel[] = "response"
+    for (name, model) in models
+        lines!(ax, xs, model.(xs, Ref(result.minimizing_p[name])), linestyle=:dash, linewidth=4.0)
+    end
 end
 
 nt_get(nt, keys::Union{Tuple,AbstractVector}) = NamedTuple{keys}([nt[key] for key in keys])
@@ -344,8 +374,8 @@ function fit_vs_differences(df::DataFrame;
 )
     df.μ_difference = abs.(df.μ_off .- μ_on)
     df.σ_difference = abs.(df.σ_off .- df.σ_on)
-    df.mse = Optim.minimum.(df.fits)
-    mse_plt = data(df) * mapping(:μ_difference, :σ_difference, :mse, layout=:model) * expectation()
+    df.rmse = Optim.minimum.(df.fits)
+    rmse_plt = data(df) * mapping(:μ_difference, :σ_difference, :rmse, layout=:model) * expectation()
     df.μ_on_error = abs.(
             (df.minimizing_p .|> p -> p.μ_on) .-
             (df.samples .|> s -> s.on.μ)
@@ -366,7 +396,7 @@ function fit_vs_differences(df::DataFrame;
             (df.samples .|> s -> s.off.σ)
     )
     σ_off_plt = data(df) * mapping(:μ_difference, :σ_difference, :σ_off_error, layout=:model) * expectation()
-    return [mse_plt, μ_on_plt, μ_off_plt, σ_on_plt, σ_off_plt]
+    return [rmse_plt, μ_on_plt, μ_off_plt, σ_on_plt, σ_off_plt]
 end
 
 function err_visual(arr)
@@ -376,18 +406,18 @@ end
 function surplus_error_vs_differences(results::AbstractArray, 
         μ_on, 
         axes = (
-            :μ_off => off -> abs(off - μ_on) => "|μ(off) - μ(on)|", 
+            :μ_off => (off -> abs(off - μ_on)) => "|μ(off) - μ(on)|", 
             (:σ_off, :σ_on) => (on, off) -> abs(off - on) => "|σ(off) - σ(on)|" 
         )
     )  
 
-    # Surplus MSE
-    surplus_mse_df = surplus_error_df(results, 
+    # Surplus RMSE
+    surplus_rmse_df = surplus_error_df(results, 
         res -> Optim.minimum(res.fits.my), res -> 0.,
         res -> Optim.minimum(res.fits.meijer), res -> 0.,
-        :surplus_mse
+        :surplus_rmse
     )
-    surplus_mse_plot = data(surplus_mse_df) * mapping(axes..., :surplus_mse) * expectation() * err_visual(surplus_mse_df.surplus_mse)
+    surplus_rmse_plot = data(surplus_rmse_df) * mapping(axes..., :surplus_rmse) * expectation() * err_visual(surplus_rmse_df.surplus_rmse)
     # Surplus σ_off
     surplus_σ_off_error_df = surplus_error_df(results, 
         res -> res.minimizing_p.my.σ_off, res -> res.samples.off.σ,
@@ -420,7 +450,7 @@ function surplus_error_vs_differences(results::AbstractArray,
     )
     surplus_μ_on_plot = data(surplus_μ_on_error_df) * mapping(axes..., :surplus_μ_on_error) * expectation() * err_visual(surplus_μ_on_error_df.surplus_μ_on_error)
 
-    return (surplus_mse=surplus_mse_plot, 
+    return (surplus_rmse=surplus_rmse_plot, 
         surplus_μ_on_error=surplus_μ_on_plot,
         surplus_σ_on_error=surplus_σ_on_plot,
         surplus_μ_off_error=surplus_μ_off_plot,
