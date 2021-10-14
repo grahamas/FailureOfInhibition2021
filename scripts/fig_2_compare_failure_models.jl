@@ -4,6 +4,8 @@ using DrWatson
 
 # using NeuralModels: AxisIndices
 
+using Dates
+
 using Base.Iterators
 using Optim, Statistics, AxisIndices
 
@@ -27,7 +29,13 @@ if !@isdefined(force_results_calc) || force_results_calc
     force_results_calc = false
 end
 
-force_results_calc = let results = results;
+force_results_calc = let results = results,
+    session_name = "fig_2_compare_failure_models",
+    session_id = "$(Dates.now())",
+    plots_subdir = "$(session_name)_$(session_id)",
+    figure_resolution=(2000, 1800)
+;
+mkpath(plotsdir(plots_subdir))
 
 results_df = results_axisarray_to_df(results; model_names=[:my, :meijer])#, :kim])
 
@@ -37,21 +45,21 @@ model_string_names = Dict(
     :kim => "Kim"
 )
 
-with_theme(nullcline_theme) do
+with_theme(model_comparison_theme) do
     rmse_plt = data(results_df) * mapping(
         :samples => (s -> s.off.μ - s.on.μ) => "Δμ",
         :fits => Optim.minimum => "RMSE",
         color=(:model => m -> model_string_names[m])
-    ) * (visual(Scatter; markersize=5, strokewidth=0)+ linear(linewidth=3))
+    ) * (visual(Scatter) + linear(; interval=:confidence) * visual(linewidth=9.))
     wide_idσ_result = results[σ_on=σ_on[begin],
         μ_off=1., σ_off=σ_off[begin]]
     wide_transσ_result = results[σ_on=σ_on[3end÷4],
         μ_off=1., σ_off=σ_off[begin]]
     narrow_transσ_result = results[σ_on=σ_on[3end÷4],
         μ_off=0.5, σ_off=σ_off[begin]]
-    drawn_fig = draw(rmse_plt)#; axis)
+    drawn_fig = draw(rmse_plt)
     fig = drawn_fig.figure
-    fig.scene.resolution[] = (1100,1000)
+    fig.scene.resolution[] = figure_resolution
     #axislegend(Makie.Axis(first(drawn_fig)); position=:lt)
 
     wide_idσ_Δμ = wide_idσ_result.samples.off.μ - wide_idσ_result.samples.on.μ
@@ -76,10 +84,10 @@ with_theme(nullcline_theme) do
     Gaussian RMSE: $(Optim.minimum(narrow_transσ_result.fits.meijer))"""
 
     noto_sans_bold = assetpath("fonts", "NotoSans-Bold.ttf")
-    label_a = fig[1,1,TopLeft()] = Label(fig, "A", font=noto_sans_bold, halign=:left, textsize=40)
-    label_b = fig[1,2,TopLeft()] = Label(fig, "B", font=noto_sans_bold, halign=:left, textsize=40)
-    label_c = fig[2,1,TopLeft()] = Label(fig, "C", font=noto_sans_bold, halign=:left, textsize=40)
-    label_d = fig[2,2,TopLeft()] = Label(fig, "D", font=noto_sans_bold, halign=:left, textsize=40)
+    label_a = fig[1,1,TopLeft()] = Label(fig, "A", font=noto_sans_bold, halign=:left)
+    label_b = fig[1,2,TopLeft()] = Label(fig, "B", font=noto_sans_bold, halign=:left)
+    label_c = fig[2,1,TopLeft()] = Label(fig, "C", font=noto_sans_bold, halign=:left)
+    label_d = fig[2,2,TopLeft()] = Label(fig, "D", font=noto_sans_bold, halign=:left)
     three_model_pairs = [
         (:my, THREE_MODELS.my),
         (:meijer, THREE_MODELS.meijer)#,

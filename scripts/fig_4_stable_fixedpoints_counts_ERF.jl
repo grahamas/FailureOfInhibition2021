@@ -20,9 +20,6 @@ using NamedDims
 # sub_A_range = sub_A_sweep_lower_bound..sub_A_sweep_upper_bound
 include(scriptsdir("load/he_sweep_arrs_nicolas.jl"))
 
-if !@isdefined DEFAULT_NAME_MAPPING
-    const DEFAULT_NAME_MAPPING = Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE))
-end
 
 nt_map(fn::Function, nt::NamedTuple{NS}) where NS = NamedTuple{NS}(map(fn, values(nt)))
 
@@ -62,12 +59,12 @@ format_tail(x) = "$(round(x, sigdigits=2))"
 
 function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         subsample_range=-Inf..Inf,
-        name_mapping=DEFAULT_NAME_MAPPING,
-        blocking_data = get_fp_arr_data("blocking", saved_lb, saved_ub, saved_len;
+        name_mapping=Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE)),
+        blocking_data = get_fp_arr_data("blocking_erf", saved_lb, saved_ub, saved_len;
                 mods=mods,
                 name_mapping=name_mapping
             ), 
-        monotonic_data = get_fp_arr_data("monotonic", saved_lb, saved_ub, saved_len;
+        monotonic_data = get_fp_arr_data("monotonic_erf", saved_lb, saved_ub, saved_len;
                 mods=mods,
                 name_mapping=name_mapping
             ),
@@ -96,7 +93,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         #     n_lattice = 2,
         #     save_idxs=nothing, save_on=false, saveat=0.1
         # ),
-        session_name = "fig_4_stable_fixedpoints_counts_nicolas",
+        session_name = "fig_4_stable_fixedpoints_counts_erf",
         session_id = "$(Dates.now())",
         axis = (width = 800, height = 800),
         bar_theme = Theme(
@@ -255,29 +252,27 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
 
 end # let
 
-tau_name_mapping = merge(DEFAULT_NAME_MAPPING, Dict(:τE => m -> m.τ[1], :τI => m -> m.τ[2]))
 
-# # Low A, unitary alpha
-# let uniform_a = 50.,
-#         mods=(
-#             α=(1.0, 1.0), 
-#             aE=uniform_a, firing_aI=uniform_a,
-#             blocking_aI=uniform_a,
-#             θE=0.125,
-#             firing_θI=0.2, blocking_θI=0.5
-#         ),
-#         saved_lb=0.1, saved_ub=1.5, saved_len=10,
-#         subsample_range=saved_lb..saved_ub;
-#     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-#         saved_len=saved_len, 
-#         session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
-#     )
-# end
+# Low A, unitary alpha
+let uniform_a = 50.,
+        mods=(
+            α=(1.0, 1.0), 
+            aE=uniform_a, firing_aI=uniform_a,
+            blocking_aI=uniform_a,
+            θE=0.125,
+            firing_θI=0.2, blocking_θI=0.5
+        ),
+        saved_lb=0.1, saved_ub=1.5, saved_len=5,
+        subsample_range=saved_lb..saved_ub;
+    plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+        saved_len=saved_len, 
+        session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
+    )
+end
 
 # High-A unitary alpha
 let uniform_a = 5.,
     mods=(
-        τ=(7.8, 7.8*4.4),
         α=(1.0, 1.0), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
@@ -287,34 +282,31 @@ let uniform_a = 5.,
     saved_lb=1., saved_ub=15., saved_len=5, # FIXME to full len
         subsample_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-        saved_len=saved_len,
-        name_mapping=tau_name_mapping,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha",
-        subsample_range = 1.9..16.
+        saved_len=saved_len, 
+        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha"
     )
 end
 
-# # Low-A non-unitary alpha
-# let uniform_a = 50.,
-#     mods=(
-#         α=(0.4, 0.7), 
-#         aE=uniform_a, firing_aI=uniform_a,
-#         blocking_aI=uniform_a,
-#         θE=0.125,
-#         firing_θI=0.2, blocking_θI=0.5
-#     ),
-#     saved_lb=0.1, saved_ub=1.5, saved_len=10,
-#     subsample_range=saved_lb..saved_ub;
-# plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-#     saved_len=saved_len, 
-#     session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
-# )
-# end
+# Low-A non-unitary alpha
+let uniform_a = 50.,
+    mods=(
+        α=(0.4, 0.7), 
+        aE=uniform_a, firing_aI=uniform_a,
+        blocking_aI=uniform_a,
+        θE=0.125,
+        firing_θI=0.2, blocking_θI=0.5
+    ),
+    saved_lb=0.1, saved_ub=1.5, saved_len=5,
+    subsample_range=saved_lb..saved_ub;
+plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+    saved_len=saved_len, 
+    session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
+)
+end
 
 # High-A non-unitary alpha
 let uniform_a = 5.,
     mods=(
-        τ=(7.8, 7.8*4.4),
         α=(0.4, 0.7), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
@@ -325,9 +317,7 @@ let uniform_a = 5.,
     subsample_range=saved_lb..saved_ub;
 plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
     saved_len=saved_len, 
-    name_mapping=tau_name_mapping,
-    session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha",
-    subsample_range = 1.9..16.
+    session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha"
 )
 end
 

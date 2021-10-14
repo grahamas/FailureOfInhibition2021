@@ -292,7 +292,7 @@ function plot_example_result!(ax::Makie.Axis, result, models=pairs(THREE_MODELS)
     ax.xlabel[] = "input"
     ax.ylabel[] = "response"
     for (name, model) in models
-        lines!(ax, xs, model.(xs, Ref(result.minimizing_p[name])), linestyle=:dash, linewidth=4.0)
+        lines!(ax, xs, model.(xs, Ref(result.minimizing_p[name])), linestyle=:dash)
     end
 end
 
