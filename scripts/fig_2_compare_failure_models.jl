@@ -33,11 +33,12 @@ force_results_calc = let results = results,
     session_name = "fig_2_compare_failure_models",
     session_id = "$(Dates.now())",
     plots_subdir = "$(session_name)_$(session_id)",
-    figure_resolution=(2000, 1800)
+    figure_resolution=(2000, 1800),
+    file_type="png"
 ;
 mkpath(plotsdir(plots_subdir))
 
-results_df = results_axisarray_to_df(results; model_names=[:my, :meijer])#, :kim])
+results_df = results_nameddimsarray_to_df(results; model_names=[:my, :meijer])#, :kim])
 
 model_string_names = Dict(
     :my => "DoS",
@@ -107,7 +108,7 @@ with_theme(model_comparison_theme) do
     #Colorbar(fig[1,2], only(drawn_fig[1,1].axis.scene.plots))
     display(drawn_fig)
 
-    save(plotsdir("toy_model_fit.svg"), drawn_fig)
+    save(plotsdir("toy_model_fit.$(file_type)"), drawn_fig)
 end
 
 false

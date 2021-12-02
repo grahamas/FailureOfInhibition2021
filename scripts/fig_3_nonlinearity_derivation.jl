@@ -1,5 +1,8 @@
-#using GLMakie; ext_2d = "png"; GLMakie.activate!()
-using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
+@quickactivate "FailureOfInhibition2021"
+
+using Makie
+using GLMakie; ext_2d = "png"; GLMakie.activate!()
+#using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
 using DrWatson, Dates
 using Colors
 
@@ -42,12 +45,12 @@ example_monotonic_nonl = is_firing.(example_firing_threshold .<= xs)
 example_failing_nonl = is_firing.(example_firing_threshold .<= xs .<= example_failing_threshold)
 
 fig = Figure(resolution=fig_resolution)
-fig[1,1] = ax_firing_example = CairoMakie.Axis(fig, ylabel="firing?",
+fig[1,1] = ax_firing_example = Makie.Axis(fig, ylabel="firing?",
     yticks=[0,1])
 lines!(ax_firing_example, xs, example_monotonic_nonl)
 
 firing_accum = zeros(size(xs))
-fig[2,1] = ax_firing_many = CairoMakie.Axis(fig, ylabel="firing?",
+fig[2,1] = ax_firing_many = Makie.Axis(fig, ylabel="firing?",
     yticks=[0,1])
 for θ ∈ θ_firing
     this_firing = is_firing.(θ .<= xs)
@@ -55,22 +58,22 @@ for θ ∈ θ_firing
     firing_accum .+= this_firing
 end
 firing_accum ./= length(θ_firing)
-fig[3,1] = ax_firing_accum = CairoMakie.Axis(fig,
+fig[3,1] = ax_firing_accum = Makie.Axis(fig,
     xlabel="input", ylabel="prop. firing")
 lines!(ax_firing_accum, xs, firing_accum)
 
-fig[1,2] = ax_failing_example = CairoMakie.Axis(fig)
+fig[1,2] = ax_failing_example = Makie.Axis(fig)
 lines!(ax_failing_example, xs, example_failing_nonl)
 
 failing_accum = zeros(size(xs))
-fig[2,2] = ax_failing_many = CairoMakie.Axis(fig)
+fig[2,2] = ax_failing_many = Makie.Axis(fig)
 for (lo, hi) ∈ zip(θ_firing, θ_failing)
     this_failing = is_firing.(lo .<= xs .<= hi)
     lines!(ax_failing_many, xs, this_failing)
     failing_accum .+= this_failing
 end
 failing_accum ./= length(θ_failing)
-fig[3,2] = ax_failing_accum = CairoMakie.Axis(fig)
+fig[3,2] = ax_failing_accum = Makie.Axis(fig)
 lines!(ax_failing_accum, xs, failing_accum)
 
 xlims!.([ax_firing_example, ax_failing_example,

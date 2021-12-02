@@ -40,7 +40,7 @@ for key in keys(model_rmses)
     @info "$(model_string_names[key]) RMSE: $(model_rmses_means[key]) ± $(model_rmses_sds[key])"
 end
 
-results_df = results_axisarray_to_df(results; model_names=[:my, :meijer, :kim])
+results_df = results_nameddimsarray_to_df(results; model_names=[:my, :meijer, :kim])
 
 sample_μ_vs_μ_plt = data(results_df) * mapping(
     :μ_off,

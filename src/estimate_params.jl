@@ -212,14 +212,12 @@ end
         μ_on, σ_on,
         μ_off, σ_off
     )
-    results = NamedAxisArray{axes_names}(
+    results = NamedDimsArray{axes_names}(
         map(off_on_off_parameters) do p
             fit_normally_distributed_thresholds(
                 p...; kwargs...
             )
-        end, 
-        axes
-            
+        end
     )
 
     return results
@@ -298,7 +296,7 @@ end
 
 nt_get(nt, keys::Union{Tuple,AbstractVector}) = NamedTuple{keys}([nt[key] for key in keys])
 
-function surplus_error_df(arr::NamedAxisArray, 
+function surplus_error_df(arr, 
         baseline_est_fn, baseline_truth_fn,
         surplus_est_fn, surplus_truth_fn,
         surplus_error_name=:surplus_error)
@@ -309,19 +307,24 @@ function surplus_error_df(arr::NamedAxisArray,
     @show maximum(surplus_est_arr)
     surplus_truth_arr = surplus_truth_fn.(arr)
     surplus_error_arr = @. abs(surplus_est_arr - surplus_truth_arr) - abs(baseline_est_arr - baseline_truth_arr)
-    return axisarray_to_df(surplus_error_arr; value_col_name=surplus_error_name)
+    return nameddimsarray_to_df(surplus_error_arr; value_col_name=surplus_error_name)
 end
 
-function axisarray_to_df(arr::NamedAxisArray{NAMES,T}; value_col_name::Symbol=:value) where {NAMES,T}
-    first_coord, first_val = first(enumerate_naa(arr))
+
+function enumerate_nda_dims(nda::NamedDimsArray{NAMES}, dims::NamedTuple{NAMES}) where NAMES
+    zip(NamedTuple{NAMES}(product(dims...)), nda)
+end
+
+function nameddimsarray_to_df(nda::NamedDimsArray{NAMES,T}, dims; value_col_name::Symbol=:value) where {NAMES,T}
+    first_coord, first_val = first(enumerate_nda_dims(nda, dims))
     N_coords = length(first_coord)
     @show T
     @show typeof(first_coord)
-    @show typeof(arr)
+    @show typeof(nda)
     @assert all(eltype(first_coord).parameters .== T)
     coord_col_names = keys(first_coord)
-    df_arr = Matrix{T}(undef, length(arr), N_coords + 1)
-    for (i, (coord, val)) in enumerate(enumerate_naa(arr))
+    df_arr = Matrix{T}(undef, length(nda), N_coords + 1)
+    for (i, (coord, val)) in enumerate(enumerate_nda_dims(nda, dims))
         df_arr[i, 1:N_coords] .= collect(coord)
         df_arr[i, N_coords+1] = val
     end
@@ -329,8 +332,8 @@ function axisarray_to_df(arr::NamedAxisArray{NAMES,T}; value_col_name::Symbol=:v
     return df
 end
 
-@memoize function results_axisarray_to_df(arr::NamedAxisArray; title="", model_names=nothing)
-    first_coord, first_val = first(enumerate_naa(arr))
+@memoize function results_nameddimsarray_to_df(nda::NamedDimsArray, dims; title="", model_names=nothing)
+    first_coord, first_val = first(enumerate_nda_dims(nda, dims))
     @assert first_val isa NamedTuple
     val_names = keys(first_val)
     @assert val_names == (:fits, :minimizing_p, :xs, :N_discarded, :samples, :truth)
@@ -351,7 +354,7 @@ end
         name => type[]
     end
     df = DataFrame(; df_coord_fields..., df_val_fields..., model=Symbol[])
-    for (coord, val) in enumerate_naa(arr)
+    for (coord, val) in enumerate_nda_dims(nda, dims)
         same_across_models = nt_get(val, model_invariants)
         for model_name in model_names
             different_across_models = NamedTuple{model_variables}(
@@ -366,7 +369,7 @@ end
 function fit_vs_differences(results::AbstractArray; 
         model_names, kwargs...
     )
-    df = results_axisarray_to_df(results; model_names=model_names)
+    df = results_nameddimsarray_to_df(results; model_names=model_names)
     fit_vs_differences(df; kwargs...)
 end
 function fit_vs_differences(df::DataFrame; 

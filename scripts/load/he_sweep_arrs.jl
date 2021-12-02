@@ -23,15 +23,16 @@ function get_fp_arr_data(nonl_name, lb, ub, len;
         nullcline_sweeping_mods = (Aee=A_range, Aei=A_range, Aie=A_range, Aii=A_range)
         nullcline_mods = merge(technical_mods, mods)
         prototype_name = "full_dynamics_$(nonl_name)"
-        fp_arr = wcm_sweep_calculate_fixedpoints(
+        fp_arr = threaded_sweep_calculate_fixedpoints(
             prototype_name, 
             nullcline_mods,
             nullcline_sweeping_mods,
             ; 
             axis_length=100
         )
-        return @dict(fp_arr, nullcline_mods, prototype_name)
+        fp_axes = nullcline_sweeping_mods
+        return @dict(fp_arr, fp_axes, nullcline_mods, prototype_name)
     end
-    @unpack fp_arr, nullcline_mods, prototype_name = file
-    return (fp_arr, nullcline_mods, prototype_name)
+    @unpack fp_arr, fp_axes, nullcline_mods, prototype_name = file
+    return (fp_arr, fp_axes, nullcline_mods, prototype_name)
 end

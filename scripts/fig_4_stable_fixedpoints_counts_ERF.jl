@@ -58,7 +58,7 @@ format_percent(x) = "$(round(Int, 100x))%"
 format_tail(x) = "$(round(x, sigdigits=2))"
 
 function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
-        subsample_range=-Inf..Inf,
+        subset_range=-Inf..Inf,
         name_mapping=Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE)),
         blocking_data = get_fp_arr_data("blocking_erf", saved_lb, saved_ub, saved_len;
                 mods=mods,
@@ -75,8 +75,8 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         monotonic_static_mod = monotonic_data[2], 
         monotonic_prototype_name = monotonic_data[3],
         fp_arr_nt = (
-            FoI=blocking_fp_arr[Aee=subsample_range,Aei=subsample_range,Aie=subsample_range,Aii=subsample_range],
-            fire=monotonic_fp_arr[Aee=subsample_range,Aei=subsample_range,Aie=subsample_range,Aii=subsample_range]
+            FoI=blocking_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range],
+            fire=monotonic_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range]
         ),
         nonl_types = keys(fp_arr_nt),
         fp_count_arr_nt = nt_map(x -> length.(x), fp_arr_nt),
@@ -263,7 +263,7 @@ let uniform_a = 50.,
             firing_θI=0.2, blocking_θI=0.5
         ),
         saved_lb=0.1, saved_ub=1.5, saved_len=5,
-        subsample_range=saved_lb..saved_ub;
+        subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len, 
         session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
@@ -280,7 +280,7 @@ let uniform_a = 5.,
         firing_θI=2.0, blocking_θI=5.0
     ),
     saved_lb=1., saved_ub=15., saved_len=5, # FIXME to full len
-        subsample_range=saved_lb..saved_ub;
+        subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len, 
         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha"
@@ -297,7 +297,7 @@ let uniform_a = 50.,
         firing_θI=0.2, blocking_θI=0.5
     ),
     saved_lb=0.1, saved_ub=1.5, saved_len=5,
-    subsample_range=saved_lb..saved_ub;
+    subset_range=saved_lb..saved_ub;
 plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
     saved_len=saved_len, 
     session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
@@ -314,7 +314,7 @@ let uniform_a = 5.,
         firing_θI=2.0, blocking_θI=5.0
     ),
     saved_lb=1., saved_ub=15., saved_len=5, # FIXME to full len
-    subsample_range=saved_lb..saved_ub;
+    subset_range=saved_lb..saved_ub;
 plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
     saved_len=saved_len, 
     session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha"
