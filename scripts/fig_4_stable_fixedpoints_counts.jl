@@ -4,7 +4,7 @@ n_threaded_workers = floor(Int, n_cores / Base.Threads.nthreads())
 # addprocs(n_threaded_workers - nworkers())
 # @show nprocs()
 using DrWatson
-quickactivate("NeonateTriCorr")
+quickactivate("FailureOfInhibition2021")
 using Pkg
 Pkg.instantiate()
 
@@ -24,60 +24,9 @@ using ThreadsX
 include(srcdir("helpers.jl"))
 include(srcdir("sweep.jl"))
 include(srcdir("metrics.jl"))
-
-# # loads failing_fp_arr and monotonic_fp_arr
-# sub_A_sweep_lower_bound = 1.
-# sub_A_sweep_upper_bound = 10.
-# sub_A_range = sub_A_sweep_lower_bound..sub_A_sweep_upper_bound
 include(scriptsdir("load/he_sweep_arrs.jl"))
 
-if !@isdefined DEFAULT_NAME_MAPPING
-    const DEFAULT_NAME_MAPPING = Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE))
-end
-
 global_saved_len=15
-
-nt_map(fn::Function, nt::NamedTuple{NS}) where NS = NamedTuple{NS}(map(fn, values(nt)))
-
-function abbrev_count_label(x)
-    if x >= 1000
-        try
-            "$(Int(x / 1000))K"
-        catch
-            "$(x / 1000)K"
-        end
-    else
-        "$(Int(x))"
-    end
-end
-
-function max_percentile_conditions(values; left_tail_pct=0.025, right_tail_pct=0.025)
-    # Note: not symmetric tails, since values can be negative
-    left_tail = maximum(values) * left_tail_pct
-    right_tail = maximum(values) * (1 - right_tail_pct)
-    middle_pct = 1 - (left_tail_pct + right_tail_pct)
-    conditions = map(values) do value
-        if value <= left_tail
-            "min"
-        elseif left_tail < value < right_tail
-            "mid"
-        elseif right_tail <= value
-            "max"
-        else
-            throw(DomainError(value))
-        end
-    end
-    return (conditions, left_tail, right_tail)
-end
-
-format_percent(x) = "$(round(Int, 100x))%"
-format_tail(x) = "$(round(x, sigdigits=2))"
-
-function subset_axes(axes_nt::NamedTuple{Names}, subset_range) where Names
-    NamedTuple{Names}(
-        [axis[axis .∈ subset_range] for axis in axes_nt]
-    )
-end
 
 function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         subset_range=-Inf..Inf,
@@ -97,11 +46,11 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         monotonic_fp_axes = monotonic_data[2], 
         monotonic_prototype_name = monotonic_data[4],
         fp_axes_nt = (
-            FoI=subset_axes(blocking_fp_axes, subset_range),
+            fire_fail=subset_axes(blocking_fp_axes, subset_range),
             fire=subset_axes(monotonic_fp_axes, subset_range)
         ),
         fp_arr_nt = (
-                FoI=blocking_fp_arr[
+                fire_fail=blocking_fp_arr[
                     Aee=blocking_fp_axes.Aee .∈ subset_range,
                     Aei=blocking_fp_axes.Aei .∈ subset_range,
                     Aie=blocking_fp_axes.Aie .∈ subset_range,
@@ -117,7 +66,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         nonl_types = keys(fp_axes_nt),
         prototype_name_nt = (
             fire=monotonic_prototype_name,
-            FoI=blocking_prototype_name
+            fire_fail=blocking_prototype_name
         ),
         E_bounds = [0.05, 0.71],
         SI_bounds = [0.05, 0.71],
@@ -177,7 +126,10 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
     )
     mkpath(plotsdir(plots_subdir))
 
+    subs_blocking, subs_blocking_dims = subset_nda_dims(blocking_fp_arr, blocking_fp_axes, subset_range)
 
+    @assert subs_blocking == fp_arr_nt.fire_fail
+    @assert subs_blocking_dims == fp_axes_nt.fire_fail
 
     # # get only stable fixedpoints
     # stable_fp_arr_nt = NamedTuple{nonl_types}(
@@ -291,7 +243,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
 
 end # let
 
-tau_name_mapping = merge(DEFAULT_NAME_MAPPING, Dict(:τE => m -> m.τ[1], :τI => m -> m.τ[2]))
+# tau_name_mapping = merge(DEFAULT_NAME_MAPPING, Dict(:τE => m -> m.τ[1], :τI => m -> m.τ[2]))
 
 # end # everywhere
 
@@ -313,24 +265,24 @@ tau_name_mapping = merge(DEFAULT_NAME_MAPPING, Dict(:τE => m -> m.τ[1], :τI =
 # end
 
 # High-A unitary alpha
-let uniform_a = 5.,
-    mods=(
-        τ=(7.8, 7.8*4.4),
-        α=(1.0, 1.0), 
-        aE=uniform_a, firing_aI=uniform_a,
-        blocking_aI=uniform_a,
-        θE=1.25,
-        firing_θI=2.0, blocking_θI=5.0
-    ),
-    saved_lb=1., saved_ub=20., saved_len=global_saved_len,
-    subset_range=saved_lb..saved_ub;
-    plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-        saved_len=saved_len,
-        name_mapping=tau_name_mapping,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha",
-        subset_range = subset_range
-    )
-end
+# let uniform_a = 5.,
+#     mods=(
+#         τ=(7.8, 7.8*4.4),
+#         α=(1.0, 1.0), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=1.25,
+#         firing_θI=2.0, blocking_θI=5.0
+#     ),
+#     saved_lb=1., saved_ub=20., saved_len=global_saved_len,
+#     subset_range=saved_lb..saved_ub;
+#     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#         saved_len=saved_len,
+#         name_mapping=tau_name_mapping,
+#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha",
+#         subset_range = subset_range
+#     )
+# end
 
 # # Low-A non-unitary alpha
 # let uniform_a = 50.,

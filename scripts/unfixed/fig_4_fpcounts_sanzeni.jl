@@ -3,7 +3,6 @@ using DrWatson
 using TravelingWaveSimulations, WilsonCowanModel, 
     TravelingWaveSimulationsPlotting, 
     Simulation73Plotting, Simulation73
-using TravelingWaveSimulationsPlotting: _collapse_to_axes
 using Dates
 using Makie
 #using GLMakie; ext_2d = "png"; GLMakie.activate!()
@@ -19,7 +18,6 @@ using NamedDims
 # sub_A_sweep_upper_bound = 10.
 # sub_A_range = sub_A_sweep_lower_bound..sub_A_sweep_upper_bound
 include(scriptsdir("load/he_sweep_arrs_nicolas.jl"))
-
 
 nt_map(fn::Function, nt::NamedTuple{NS}) where NS = NamedTuple{NS}(map(fn, values(nt)))
 
@@ -57,14 +55,18 @@ end
 format_percent(x) = "$(round(Int, 100x))%"
 format_tail(x) = "$(round(x, sigdigits=2))"
 
+if !@isdefined DEFAULT_NAME_MAPPING
+    const DEFAULT_NAME_MAPPING = Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE))
+end
+
 function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         subset_range=-Inf..Inf,
-        name_mapping=Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE)),
-        blocking_data = get_fp_arr_data("blocking_erf", saved_lb, saved_ub, saved_len;
+        name_mapping=DEFAULT_NAME_MAPPING,
+        blocking_data = get_fp_arr_data("blocking", saved_lb, saved_ub, saved_len;
                 mods=mods,
                 name_mapping=name_mapping
             ), 
-        monotonic_data = get_fp_arr_data("monotonic_erf", saved_lb, saved_ub, saved_len;
+        monotonic_data = get_fp_arr_data("monotonic", saved_lb, saved_ub, saved_len;
                 mods=mods,
                 name_mapping=name_mapping
             ),
@@ -75,25 +77,16 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         monotonic_static_mod = monotonic_data[2], 
         monotonic_prototype_name = monotonic_data[3],
         fp_arr_nt = (
-            FoI=blocking_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range],
+            fire_fail=blocking_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range],
             fire=monotonic_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range]
         ),
         nonl_types = keys(fp_arr_nt),
         fp_count_arr_nt = nt_map(x -> length.(x), fp_arr_nt),
         prototype_name_nt = (
             fire=monotonic_prototype_name,
-            FoI=blocking_prototype_name
+            fire_fail=blocking_prototype_name
         ),
-        E_bounds = [0.05, 0.71],
-        SI_bounds = [0.05, 0.71],
-        arrows_step=0.05,
-        # mods = (
-        #     α=(0.4, 0.7), 
-        #     firing_θI=0.2, blocking_θI=0.5, 
-        #     n_lattice = 2,
-        #     save_idxs=nothing, save_on=false, saveat=0.1
-        # ),
-        session_name = "fig_4_stable_fixedpoints_counts_erf",
+        session_name = "fig_4_fpcounts_tau",
         session_id = "$(Dates.now())",
         axis = (width = 800, height = 800),
         bar_theme = Theme(
@@ -234,6 +227,12 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         tightlimits!.(filter(x->x isa CairoMakie.Axis, contents(fig.figure.layout)), Ref(Bottom()))
         save(plotsdir(plots_subdir, "stablefp_E_distribution.$(ext_2d)"), fig)
 
+        @show mods.τ[2]
+        @show count(unrolled_E_df.condition .== "max")
+        @show count(unrolled_E_df.condition .== "mid")
+        @show count(unrolled_E_df.condition .== "min")
+        @show nrow(unrolled_E_df)
+
         ret_fig
 
     end # bar_theme
@@ -252,23 +251,25 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
 
 end # let
 
+tau_name_mapping = merge(DEFAULT_NAME_MAPPING, Dict(:τ => m -> round(m.τ[2] / m.τ[1], sigdigits=2)))
 
-# Low A, unitary alpha
-let uniform_a = 50.,
-        mods=(
-            α=(1.0, 1.0), 
-            aE=uniform_a, firing_aI=uniform_a,
-            blocking_aI=uniform_a,
-            θE=0.125,
-            firing_θI=0.2, blocking_θI=0.5
-        ),
-        saved_lb=0.1, saved_ub=1.5, saved_len=5,
-        subset_range=saved_lb..saved_ub;
-    plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-        saved_len=saved_len, 
-        session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
-    )
-end
+# # Low A, unitary alpha
+# let uniform_a = 50.,
+#         mods=(
+#             α=(1.0, 1.0), 
+#             aE=uniform_a, firing_aI=uniform_a,
+#             blocking_aI=uniform_a,
+#             θE=0.125,
+#             firing_θI=0.2, blocking_θI=0.5,
+#             τ=(1.0, τI)
+#         ),
+#         saved_lb=0.1, saved_ub=1.5, saved_len=10,
+#         subset_range=saved_lb..saved_ub;
+#     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#         saved_len=saved_len, 
+#         session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
+#     )
+# end
 
 # High-A unitary alpha
 let uniform_a = 5.,
@@ -276,48 +277,50 @@ let uniform_a = 5.,
         α=(1.0, 1.0), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
-        θE=1.25,
-        firing_θI=2.0, blocking_θI=5.0
+        θE=1.19,
+        firing_θI=8.51, blocking_θI=17.0,
+        τ=(7.8, 34.3)
     ),
     saved_lb=1., saved_ub=15., saved_len=5, # FIXME to full len
         subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-        saved_len=saved_len, 
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha"
+        saved_len=saved_len,
+        name_mapping=tau_name_mapping,
+        session_name="fig_4_stable_fixedpoints_counts_hiA_unitAlpha_τ$τI"
     )
 end
 
-# Low-A non-unitary alpha
-let uniform_a = 50.,
-    mods=(
-        α=(0.4, 0.7), 
-        aE=uniform_a, firing_aI=uniform_a,
-        blocking_aI=uniform_a,
-        θE=0.125,
-        firing_θI=0.2, blocking_θI=0.5
-    ),
-    saved_lb=0.1, saved_ub=1.5, saved_len=5,
-    subset_range=saved_lb..saved_ub;
-plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-    saved_len=saved_len, 
-    session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
-)
-end
+# # Low-A non-unitary alpha
+# let uniform_a = 50.,
+#     mods=(
+#         α=(0.4, 0.7), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=0.125,
+#         firing_θI=0.2, blocking_θI=0.5,
+            # τ=(1.0, τI)
+#     ),
+#     saved_lb=0.1, saved_ub=1.5, saved_len=10,
+#     subset_range=saved_lb..saved_ub;
+# plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#     saved_len=saved_len, 
+#     session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
+# )
+# end
 
-# High-A non-unitary alpha
-let uniform_a = 5.,
-    mods=(
-        α=(0.4, 0.7), 
-        aE=uniform_a, firing_aI=uniform_a,
-        blocking_aI=uniform_a,
-        θE=1.25,
-        firing_θI=2.0, blocking_θI=5.0
-    ),
-    saved_lb=1., saved_ub=15., saved_len=5, # FIXME to full len
-    subset_range=saved_lb..saved_ub;
-plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-    saved_len=saved_len, 
-    session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha"
-)
-end
-
+# # High-A non-unitary alpha
+# let uniform_a = 5.,
+#     mods=(
+#         α=(0.4, 0.7), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=1.25,
+#         firing_θI=2.0, blocking_θI=5.0,
+            # τ=(1.0, τI)
+#     ),
+#     saved_lb=1., saved_ub=15., saved_len=5, # FIXME to full len
+#     subset_range=saved_lb..saved_ub;
+# plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#     saved_len=saved_len, 
+#     session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha"
+# end

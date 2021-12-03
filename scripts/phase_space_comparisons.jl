@@ -3,7 +3,6 @@ using DrWatson
 using TravelingWaveSimulations, WilsonCowanModel, 
     TravelingWaveSimulationsPlotting, 
     Simulation73Plotting, Simulation73
-using TravelingWaveSimulationsPlotting: _collapse_to_axes
 using Dates
 #using GLMakie; ext_2d = "png"; GLMakie.activate!(); @warn "Using OpenGL"
 using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); @warn "Using Cairo"

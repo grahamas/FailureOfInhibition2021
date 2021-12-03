@@ -1,3 +1,8 @@
+
+if !@isdefined DEFAULT_NAME_MAPPING
+    const DEFAULT_NAME_MAPPING = Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE), :τE => m -> m.τ[1], :τI => m -> m.τ[2])
+end
+
 function get_fp_arr_data(nonl_name, lb, ub, len; 
         technical_mods=(
             n_lattice = 2, 
@@ -7,7 +12,8 @@ function get_fp_arr_data(nonl_name, lb, ub, len;
         ),
         mods=(;),
         name_mapping=[],
-        refresh_sweep_arrs=false
+        refresh_sweep_arrs=false,
+        subset_range=-Inf..Inf
         )
     file, filename = produce_or_load(datadir(), 
         Dict("lb" => lb, 
@@ -34,5 +40,6 @@ function get_fp_arr_data(nonl_name, lb, ub, len;
         return @dict(fp_arr, fp_axes, nullcline_mods, prototype_name)
     end
     @unpack fp_arr, fp_axes, nullcline_mods, prototype_name = file
-    return (fp_arr, fp_axes, nullcline_mods, prototype_name)
+    fp_arr, fp_axes = subset_nda_dims(fp_arr, fp_axes, subset_range)
+    return (fp_arr=fp_arr, fp_axes=fp_axes, nullcline_mods=nullcline_mods, prototype_name=prototype_name)
 end

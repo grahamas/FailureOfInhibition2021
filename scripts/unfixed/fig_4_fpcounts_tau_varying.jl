@@ -3,7 +3,6 @@ using DrWatson
 using TravelingWaveSimulations, WilsonCowanModel, 
     TravelingWaveSimulationsPlotting, 
     Simulation73Plotting, Simulation73
-using TravelingWaveSimulationsPlotting: _collapse_to_axes
 using Dates
 using Makie
 #using GLMakie; ext_2d = "png"; GLMakie.activate!()
@@ -78,14 +77,14 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         monotonic_static_mod = monotonic_data[2], 
         monotonic_prototype_name = monotonic_data[3],
         fp_arr_nt = (
-            FoI=blocking_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range],
+            fire_fail=blocking_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range],
             fire=monotonic_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range]
         ),
         nonl_types = keys(fp_arr_nt),
         fp_count_arr_nt = nt_map(x -> length.(x), fp_arr_nt),
         prototype_name_nt = (
             fire=monotonic_prototype_name,
-            FoI=blocking_prototype_name
+            fire_fail=blocking_prototype_name
         ),
         session_name = "fig_4_fpcounts_tau",
         session_id = "$(Dates.now())",
@@ -254,6 +253,8 @@ end # let
 
 tau_name_mapping = merge(DEFAULT_NAME_MAPPING, Dict(:τ => m -> round(m.τ[2] / m.τ[1], sigdigits=2)))
 
+for τI ∈ [0.4, 0.8, 1.4, 15.]
+
 # # Low A, unitary alpha
 # let uniform_a = 50.,
 #         mods=(
@@ -278,9 +279,9 @@ let uniform_a = 5.,
         α=(1.0, 1.0), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
-        θE=1.19,
-        firing_θI=8.51, blocking_θI=17.0,
-        τ=(7.8, 34.3)
+        θE=1.25,
+        firing_θI=2.0, blocking_θI=5.0,
+        τ=(1.0, τI)
     ),
     saved_lb=1., saved_ub=15., saved_len=5, # FIXME to full len
         subset_range=saved_lb..saved_ub;
@@ -325,3 +326,5 @@ end
 #     saved_len=saved_len, 
 #     session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha"
 # end
+
+end
