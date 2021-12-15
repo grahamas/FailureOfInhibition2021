@@ -76,15 +76,15 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         monotonic_fp_arr = monotonic_data[1],
         monotonic_static_mod = monotonic_data[2], 
         monotonic_prototype_name = monotonic_data[3],
-        fp_arr_nt = (
-            fire_fail=blocking_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range],
-            fire=monotonic_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range]
+        fp_arr_nt = Dict(
+            Symbol("fire→fail")=>blocking_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range],
+            :fire=>monotonic_fp_arr[Aee=subset_range,Aei=subset_range,Aie=subset_range,Aii=subset_range]
         ),
         nonl_types = keys(fp_arr_nt),
         fp_count_arr_nt = nt_map(x -> length.(x), fp_arr_nt),
-        prototype_name_nt = (
-            fire=monotonic_prototype_name,
-            fire_fail=blocking_prototype_name
+        prototype_name_nt = Dict(
+            :fire=>monotonic_prototype_name,
+            Symbol("fire→fail")=>blocking_prototype_name
         ),
         session_name = "fig_4_fpcounts_tau",
         session_id = "$(Dates.now())",

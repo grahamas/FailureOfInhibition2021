@@ -44,18 +44,6 @@ function subset_nda_dims(nda::NamedDimsArray{Names}, nda_dims::NamedTuple{Names}
     return (subset_nda, subset_nda_dims)
 end
 
-function abbrev_count_label(x)
-    if x >= 1000
-        try
-            "$(Int(x / 1000))K"
-        catch
-            "$(x / 1000)K"
-        end
-    else
-        "$(Int(x))"
-    end
-end
-
 function max_percentile_conditions(values; left_tail_pct=0.025, right_tail_pct=0.025)
     # Note: not symmetric tails, since values can be negative
     left_tail = maximum(values) * left_tail_pct
