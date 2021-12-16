@@ -11,11 +11,10 @@ Pkg.instantiate()
 # @everywhere begin
 using TravelingWaveSimulations, WilsonCowanModel, Simulation73
 using Dates
-using GLMakie; ext_2d = "png"; GLMakie.activate!(); myMakie = GLMakie
-#using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); myMakie = CairoMakie
-using AlgebraOfGraphics, ColorSchemes
+#using GLMakie; ext_2d = "png"; GLMakie.activate!(); myMakie = GLMakie
+using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); myMakie = CairoMakie
+using AlgebraOfGraphics, ColorSchemes, ColorTypes
 using DataFrames
-using ColorTypes
 using NullclineAnalysis
 using IterTools
 using ThreadsX
@@ -26,7 +25,7 @@ include(srcdir("sweep.jl"))
 include(srcdir("metrics.jl"))
 include(scriptsdir("load/he_sweep_arrs.jl"))
 
-global_saved_len=15
+global_saved_len=10
 
 function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         subset_range=-Inf..Inf,
@@ -141,7 +140,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
     n_obs = length(stablefp_E_nt[nonl_types[1]])
     unrolled_E_df = DataFrame(
         nonl_type=repeat(nonl_types |> collect, inner=(n_obs,)),
-        E = vcat([stablefp_E_nt[nonl][:] for nonl in nonl_types]...)
+        E = vcat([stablefp_E_nt[nonl][:] for nonl in nonl_types]...),
     )
 
     unrolled_SI_df = DataFrame(
@@ -150,16 +149,27 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
     )
     dropmissing!(unrolled_E_df); dropmissing!(unrolled_SI_df)
 
+    unrolled_df = DataFrame(
+        "Nonlinearity" => [unrolled_E_df.nonl_type; unrolled_SI_df.nonl_type],
+        "FP value" => [unrolled_E_df.E; unrolled_SI_df.SI],
+        "Metric" => [repeat(["E"], inner=nrow(unrolled_E_df)); repeat(["SI"], inner=nrow(unrolled_SI_df))]
+    )
+
     unrolled_SI_df.condition, SI_left, SI_right = max_percentile_conditions(unrolled_SI_df.SI)
     unrolled_E_df.condition, E_left, E_right = max_percentile_conditions(unrolled_E_df.E)
 
     condition_sorter = sorter("min", "mid", "max")
+    
+    with_theme(violin_theme) do
+        fig = data(unrolled_SI_df) * mapping(:nonl_type, :SI) * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
+        save(plotsdir(plots_subdir, "stablefp_SI_violins.$(ext_2d)"), fig)
 
-    # fig = data(unrolled_SI_df) * mapping(:nonl_type, :SI) * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
-    # save(plotsdir(plots_subdir, "stablefp_SI_violins.$(ext_2d)"), fig)
+        fig = data(unrolled_E_df) * mapping(:nonl_type, :E) * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
+        save(plotsdir(plots_subdir, "stablefp_E_violins.$(ext_2d)"), fig)
 
-    fig = data(unrolled_E_df) * mapping(:nonl_type, :E) * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
-    save(plotsdir(plots_subdir, "stablefp_E_violins.$(ext_2d)"), fig)
+        fig = data(unrolled_df) * mapping("Metric", "FP value", color="Nonlinearity", side="Nonlinearity") * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
+        save(plotsdir(plots_subdir, "stablefp_split_violins.$(ext_2d)"), fig)
+    end
 
     with_theme(bar_theme) do
 
@@ -236,11 +246,11 @@ let uniform_a = 5.,
         θE=1.25,
         firing_θI=2.0, blocking_θI=5.0
     ),
-    saved_lb=1., saved_ub=20., saved_len=global_saved_len,
+    saved_lb=1., saved_ub=100., saved_len=global_saved_len,
     subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha",
+        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
         subset_range = subset_range
     )
 end
@@ -263,22 +273,21 @@ end
 # end
 
 # High-A non-unitary alpha
-# let uniform_a = 5.,
-#     mods=(
-#         τ=(7.8, 7.8*4.4),
-#         α=(0.4, 0.7), 
-#         aE=uniform_a, firing_aI=uniform_a,
-#         blocking_aI=uniform_a,
-#         θE=1.25,
-#         firing_θI=2.0, blocking_θI=5.0
-#     ),
-#     saved_lb=1., saved_ub=30., saved_len=global_saved_len,
-#     subset_range=saved_lb..saved_ub;
-# plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-#     saved_len=saved_len, 
-#     name_mapping=tau_name_mapping,
-#     session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha",
-#     subset_range = subset_range
-# )
-# end
+let uniform_a = 5.,
+    mods=(
+        τ=(7.8, 7.8*4.4),
+        α=(0.4, 0.7), 
+        aE=uniform_a, firing_aI=uniform_a,
+        blocking_aI=uniform_a,
+        θE=1.25,
+        firing_θI=2.0, blocking_θI=5.0
+    ),
+    saved_lb=1., saved_ub=100., saved_len=global_saved_len,
+    subset_range=saved_lb..saved_ub;
+plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+    saved_len=saved_len,
+    session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha",
+    subset_range = subset_range
+)
+end
 

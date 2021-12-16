@@ -1047,7 +1047,7 @@ version = "0.15.3"
 
 [[MakieCore]]
 deps = ["Observables"]
-git-tree-sha1 = "7bcc8323fb37523a6a51ade2234eee27a11114c8"
+path = "/home/graham/.julia/dev/Makie/MakieCore"
 uuid = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
 version = "0.1.3"
 
@@ -1859,10 +1859,10 @@ uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
 version = "0.4.67"
 
 [[TravelingWaveSimulations]]
-deps = ["ArgParse", "BSON", "Dates", "DiffEqBase", "DiffEqOperators", "Distributed", "Documenter", "DrWatson", "FileIO", "Interpolations", "IterTools", "Lazy", "LinearAlgebra", "Logging", "NeuralModels", "NullclineAnalysis", "Optim", "Simulation73", "StaticArrays", "Statistics", "TypedTables", "UnPack", "WilsonCowanModel"]
+deps = ["ArgParse", "BSON", "Dates", "DiffEqBase", "DiffEqOperators", "Distributed", "Documenter", "DrWatson", "FileIO", "Interpolations", "IterTools", "Lazy", "LinearAlgebra", "Logging", "NeuralModels", "NullclineAnalysis", "Optim", "OrdinaryDiffEq", "Simulation73", "StaticArrays", "Statistics", "TypedTables", "UnPack", "WilsonCowanModel"]
 path = "/home/graham/.julia/dev/TravelingWaveSimulations"
 uuid = "b7a787de-74f3-11e9-2c3d-21bc6dc7d0e1"
-version = "3.1.1"
+version = "3.1.2"
 
 [[TravelingWaveSimulationsPlotting]]
 deps = ["AlgebraOfGraphics", "ArrayInterface", "BSON", "BenchmarkTools", "CairoMakie", "ColorSchemes", "Colors", "Contour", "Cthulhu", "DataStructures", "Dates", "DiffEqBase", "DiffEqOperators", "DifferentialEquations", "DrWatson", "ForwardDiff", "GLMakie", "HypothesisTests", "Interpolations", "IterTools", "LinearAlgebra", "LoopVectorization", "Makie", "NamedDims", "NeuralModels", "NullclineAnalysis", "OffsetArrays", "Optim", "ProgressMeter", "Roots", "Simulation73", "Simulation73Plotting", "StaticArrays", "Statistics", "StatsFuns", "Tables", "TravelingWaveSimulations", "VectorizationBase", "WilsonCowanModel"]
