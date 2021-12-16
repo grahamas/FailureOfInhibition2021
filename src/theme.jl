@@ -25,7 +25,8 @@ bar_theme = Theme(
         strokewidth= 5.,
         ytickformat = xs -> abbrev_count_label.(xs)
     )
-),
+)
+
 nullcline_theme = Theme(
     fontsize=48,
     Axis = (
