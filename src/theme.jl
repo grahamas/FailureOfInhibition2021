@@ -1,4 +1,4 @@
-using ColorSchemes
+using ColorSchemes, ColorTypes
 
 abbrev_count_label = x -> begin
         if x >= 1000
@@ -56,7 +56,7 @@ nullcline_theme = Theme(
 )
 
 violin_theme = Theme(
-    fontsize=48,
+    fontsize=24,
     Axis = (
         backgroundcolor = RGBA(1.,1.,1.,0.),
         leftspinevisible = true,

@@ -5,7 +5,7 @@
 # using Makie
 # using AxisIndices, IterTools
 
-using ProgressMeter
+using ProgressMeter, IterTools, ThreadsX
 
 function sweep_calculate_fixedpoints(prototype_name::String, static_mods, dynamic_mods::NamedTuple{NAMES}; axis_length::Integer=150) where {NAMES}
     if :n_lattice ∉ NAMES

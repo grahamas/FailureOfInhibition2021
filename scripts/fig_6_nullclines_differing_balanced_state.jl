@@ -46,7 +46,7 @@ function plot_nullclines_differing_balanced_state(;
 
     # example_both_3sfp_idxs = findall(n_sfp_monotonic .== 3 .& n_sfp_blocking .== 3)
     # example_both_3sfp_idx = example_both_3sfp_idxs[end]
-    # example_both_3sfp_coord = TravelingWaveSimulationsPlotting.get_coordinate(blocking_fp_arr, example_both_3sfp_idx)
+    # example_both_3sfp_coord = TravelingWaveSimulationsPlotting.get_coordinate(blocking_fp_axes, example_both_3sfp_idx)
     higher_aie = (Aee=1.2, Aei=1.0, Aie=1.4, Aii=0.8)
     higher_aie_nullcline_params = get_nullcline_params(blocking_prototype(; smods..., higher_aie...))
     @info "Higher Aie FPs: $(filter_stable_fps(higher_aie_nullcline_params, calculate_fixedpoints(higher_aie_nullcline_params)))"

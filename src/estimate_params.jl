@@ -1,6 +1,7 @@
 using Base: sign_mask
 using Parameters
 using AlgebraOfGraphics, DataFrames
+using NamedDims
 
 
 abstract type NonlP{T} end
@@ -296,7 +297,7 @@ end
 
 nt_get(nt, keys::Union{Tuple,AbstractVector}) = NamedTuple{keys}([nt[key] for key in keys])
 
-function surplus_error_df(arr, 
+function surplus_error_df(arr, dims,
         baseline_est_fn, baseline_truth_fn,
         surplus_est_fn, surplus_truth_fn,
         surplus_error_name=:surplus_error)
@@ -307,15 +308,19 @@ function surplus_error_df(arr,
     @show maximum(surplus_est_arr)
     surplus_truth_arr = surplus_truth_fn.(arr)
     surplus_error_arr = @. abs(surplus_est_arr - surplus_truth_arr) - abs(baseline_est_arr - baseline_truth_arr)
-    return nameddimsarray_to_df(surplus_error_arr; value_col_name=surplus_error_name)
+    return nameddimsarray_to_df(surplus_error_arr, dims; value_col_name=surplus_error_name)
 end
 
+function nda_dims_getindex(nda::NamedDimsArray{NAMES}, dims::NamedTuple{NAMES}, nt::NamedTuple{NAMES}) where NAMES
+    idx = NamedTuple{NAMES}([findfirst(isapprox.(dims[name], val)) for (name, val) in pairs(nt)])
+    getindex(nda; idx...)
+end
 
 function enumerate_nda_dims(nda::NamedDimsArray{NAMES}, dims::NamedTuple{NAMES}) where NAMES
-    zip(NamedTuple{NAMES}(product(dims...)), nda)
+    zip(NamedTuple{NAMES}.(product(dims...)), nda)
 end
 
-function nameddimsarray_to_df(nda::NamedDimsArray{NAMES,T}, dims; value_col_name::Symbol=:value) where {NAMES,T}
+function nameddimsarray_to_df(nda::NamedDimsArray{NAMES,T}, dims::NamedTuple{NAMES}; value_col_name::Symbol=:value) where {NAMES,T}
     first_coord, first_val = first(enumerate_nda_dims(nda, dims))
     N_coords = length(first_coord)
     @show T
@@ -406,7 +411,7 @@ function err_visual(arr)
     visual(colorrange=(min(0., minimum(arr)), maximum(arr)))
 end
 
-function surplus_error_vs_differences(results::AbstractArray, 
+function surplus_error_vs_differences(results::AbstractArray, dims,
         μ_on, 
         axes = (
             :μ_off => (off -> abs(off - μ_on)) => "|μ(off) - μ(on)|", 
@@ -415,14 +420,14 @@ function surplus_error_vs_differences(results::AbstractArray,
     )  
 
     # Surplus RMSE
-    surplus_rmse_df = surplus_error_df(results, 
+    surplus_rmse_df = surplus_error_df(results, dims,
         res -> Optim.minimum(res.fits.my), res -> 0.,
         res -> Optim.minimum(res.fits.meijer), res -> 0.,
         :surplus_rmse
     )
     surplus_rmse_plot = data(surplus_rmse_df) * mapping(axes..., :surplus_rmse) * expectation() * err_visual(surplus_rmse_df.surplus_rmse)
     # Surplus σ_off
-    surplus_σ_off_error_df = surplus_error_df(results, 
+    surplus_σ_off_error_df = surplus_error_df(results, dims,
         res -> res.minimizing_p.my.σ_off, res -> res.samples.off.σ,
         res -> res.minimizing_p.meijer.σ_off, res -> res.samples.off.σ,
         :surplus_σ_off_error
@@ -430,7 +435,7 @@ function surplus_error_vs_differences(results::AbstractArray,
     surplus_σ_off_plot = data(surplus_σ_off_error_df) * mapping(axes..., :surplus_σ_off_error) * expectation()# * err_visual(surplus_σ_off_error_df.surplus_σ_off_error)
 
     # Surplus σ_on
-    surplus_σ_on_error_df = surplus_error_df(results, 
+    surplus_σ_on_error_df = surplus_error_df(results, dims,
         res -> res.minimizing_p.my.σ_on, res -> res.samples.on.σ,
         res -> res.minimizing_p.meijer.σ_on, res -> res.samples.on.σ,
         :surplus_σ_on_error
@@ -438,7 +443,7 @@ function surplus_error_vs_differences(results::AbstractArray,
     surplus_σ_on_plot = data(surplus_σ_on_error_df) * mapping(axes..., :surplus_σ_on_error) * expectation() * err_visual(surplus_σ_on_error_df.surplus_σ_on_error)
 
     # Surplus μ_off
-    surplus_μ_off_error_df = surplus_error_df(results, 
+    surplus_μ_off_error_df = surplus_error_df(results, dims,
         res -> res.minimizing_p.my.μ_off, res -> res.samples.off.μ,
         res -> res.minimizing_p.meijer.μ_off, res -> res.samples.off.μ,
         :surplus_μ_off_error
@@ -446,7 +451,7 @@ function surplus_error_vs_differences(results::AbstractArray,
     surplus_μ_off_plot = data(surplus_μ_off_error_df) * mapping(axes..., :surplus_μ_off_error) * expectation() * err_visual(surplus_μ_off_error_df.surplus_μ_off_error)
 
     # Surplus μ_on
-    surplus_μ_on_error_df = surplus_error_df(results, 
+    surplus_μ_on_error_df = surplus_error_df(results, dims,
         res -> res.minimizing_p.my.μ_on, res -> res.samples.on.μ,
         res -> res.minimizing_p.meijer.μ_on, res -> res.samples.on.μ,
         :surplus_μ_on_error

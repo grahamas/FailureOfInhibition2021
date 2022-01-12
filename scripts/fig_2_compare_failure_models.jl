@@ -7,7 +7,7 @@ using DrWatson
 using Dates
 
 using Base.Iterators
-using Optim, Statistics, AxisIndices
+using Optim, Statistics
 
 using CairoMakie,Makie
 
@@ -15,49 +15,59 @@ using NeuralModels
 
 using Memoize
 
-include(srcdir("axisarray.jl"))
 include(srcdir("estimate_params.jl"))
 include(srcdir("theme.jl"))
 
-if !@isdefined(force_results_calc) || force_results_calc
-    μ_on=0.; σ_on=0.04:0.02:0.24; 
-    μ_off=0.5:0.05:1.; σ_off=0.04:0.02:0.24    
-    results = fit_range_of_thresholds(;
-        μ_on=μ_on, σ_on=σ_on,
-        μ_off=μ_off, σ_off=σ_off
-    )
-    force_results_calc = false
-end
-
-force_results_calc = let results = results,
+fig_2_results_df = let μ_on=0., 
+    σ_on=0.04:0.02:0.24,
+    μ_off=0.5:0.05:1., σ_off=0.04:0.02:0.24,
     session_name = "fig_2_compare_failure_models",
     session_id = "$(Dates.now())",
     plots_subdir = "$(session_name)_$(session_id)",
     figure_resolution=(2000, 1800),
     file_type="png"
 ;
+dims = (
+    # μ_on = μ_on, 
+    σ_on=σ_on,
+    μ_off=μ_off, σ_off=σ_off
+)
+
+results = fit_range_of_thresholds(;
+    μ_on=μ_on,
+    dims...
+)
+
 mkpath(plotsdir(plots_subdir))
 
-results_df = results_nameddimsarray_to_df(results; model_names=[:my, :meijer])#, :kim])
+@show typeof(results).parameters[1]
+results_df = results_nameddimsarray_to_df(results, dims; model_names=[#:kim,
+ :my, :meijer])
 
 model_string_names = Dict(
     :my => "DoS",
     :meijer => "Gauss",
     :kim => "Kim"
 )
+three_models_order = [#kim, 
+:my, :meijer]
+three_models_sorter = sorter([model_string_names[name] for name in three_models_order]...)
 
 with_theme(model_comparison_theme) do
     rmse_plt = data(results_df) * mapping(
         :samples => (s -> s.off.μ - s.on.μ) => "Δμ",
         :fits => Optim.minimum => "RMSE",
-        color=(:model => m -> model_string_names[m])
+        color=(:model => (m -> model_string_names[m]))
     ) * (visual(Scatter) + linear(; interval=:confidence) * visual(linewidth=9.))
-    wide_idσ_result = results[σ_on=σ_on[begin],
-        μ_off=1., σ_off=σ_off[begin]]
-    wide_transσ_result = results[σ_on=σ_on[3end÷4],
-        μ_off=1., σ_off=σ_off[begin]]
-    narrow_transσ_result = results[σ_on=σ_on[3end÷4],
-        μ_off=0.5, σ_off=σ_off[begin]]
+    wide_idσ_result = nda_dims_getindex(results, dims, (σ_on=σ_on[begin],
+        μ_off=1., σ_off=σ_off[begin]))
+    @show wide_idσ_result.minimizing_p
+    wide_transσ_result = nda_dims_getindex(results, dims, (σ_on=σ_on[3end÷4],
+        μ_off=1., σ_off=σ_off[begin]))
+    @show wide_transσ_result.minimizing_p
+    narrow_transσ_result = nda_dims_getindex(results, dims, (σ_on=σ_on[3end÷4],
+        μ_off=0.5, σ_off=σ_off[begin]))
+    @show narrow_transσ_result.minimizing_p
     drawn_fig = draw(rmse_plt)
     fig = drawn_fig.figure
     fig.scene.resolution[] = figure_resolution
@@ -89,11 +99,7 @@ with_theme(model_comparison_theme) do
     label_b = fig[1,2,TopLeft()] = Label(fig, "B", font=noto_sans_bold, halign=:left)
     label_c = fig[2,1,TopLeft()] = Label(fig, "C", font=noto_sans_bold, halign=:left)
     label_d = fig[2,2,TopLeft()] = Label(fig, "D", font=noto_sans_bold, halign=:left)
-    three_model_pairs = [
-        (:my, THREE_MODELS.my),
-        (:meijer, THREE_MODELS.meijer)#,
-        #(:kim, THREE_MODELS.kim)
-    ]
+    three_model_pairs = [(name, getproperty(THREE_MODELS,name)) for name ∈ three_models_order]
     plot_example_result!(wide_idσ_ax, wide_idσ_result, three_model_pairs)
     plot_example_result!(wide_transσ_ax, wide_transσ_result, three_model_pairs)
     plot_example_result!(narrow_transσ_ax, narrow_transσ_result, three_model_pairs)
@@ -108,9 +114,9 @@ with_theme(model_comparison_theme) do
     #Colorbar(fig[1,2], only(drawn_fig[1,1].axis.scene.plots))
     display(drawn_fig)
 
-    save(plotsdir("toy_model_fit.$(file_type)"), drawn_fig)
+    save(plotsdir(plots_subdir, "toy_model_fit.$(file_type)"), drawn_fig)
 end
 
-false
+results_df
 
 end;

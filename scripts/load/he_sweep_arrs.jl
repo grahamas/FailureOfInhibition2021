@@ -1,4 +1,6 @@
 
+using NamedDimsHelpers
+
 if !@isdefined DEFAULT_NAME_MAPPING
     const DEFAULT_NAME_MAPPING = Dict("αE" => mods -> mods.α[1], "αI" => mods -> mods.α[2], "θE" => mods -> mods.θE, "a" => mods -> (@assert mods.aE == mods.firing_aI == mods.blocking_aI; mods.aE), :τE => m -> m.τ[1], :τI => m -> m.τ[2])
 end
