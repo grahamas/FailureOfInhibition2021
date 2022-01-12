@@ -18,6 +18,7 @@ using DataFrames
 using NullclineAnalysis
 using IterTools
 using ThreadsX
+using NamedDims, NamedDimsHelpers
 
 include(srcdir("helpers.jl"))
 include(srcdir("theme.jl"))
@@ -25,7 +26,7 @@ include(srcdir("sweep.jl"))
 include(srcdir("metrics.jl"))
 include(scriptsdir("load/he_sweep_arrs.jl"))
 
-global_saved_len=10
+global_saved_len=15
 
 function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         subset_range=-Inf..Inf,
@@ -58,7 +59,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
                 :fire=>monotonic_fp_arr[
                     Aee=monotonic_fp_axes.Aee .∈ subset_range,
                     Aei=monotonic_fp_axes.Aei .∈ subset_range,
-                    Aie=monotonic_fp_axes.Aie .∈ subset_range,
+                    Aie4.4*=monotonic_fp_axes.Aie .∈ subset_range,
                     Aii=monotonic_fp_axes.Aii .∈ subset_range
                 ]
             ),
@@ -67,20 +68,16 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
             :fire=>monotonic_prototype_name,
             Symbol("fire→fail")=>blocking_prototype_name
         ),
-        E_bounds = [0.05, 0.71],
-        SI_bounds = [0.05, 0.71],
         arrows_step=0.05,
-        # mods = (
-        #     α=(0.4, 0.7), 
-        #     firing_θI=0.2, blocking_θI=0.5, 
-        #     n_lattice = 2,
-        #     save_idxs=nothing, save_on=false, saveat=0.1
-        # ),
         session_name = "fig_4_stable_fixedpoints_counts_nicolas",
         session_id = "$(Dates.now())",
-        axis = (width = 800, height = 800),
+        axis = (width = 1600, height = 1600),
         plots_subdir = "$(session_name)_$(session_id)"
     )
+    # Overwrite variables with subsetted values
+    blocking_fp_arr = fp_arr_nt[Symbol("fire→fail")]
+    monotonic_fp_arr = fp_arr_nt[:fire]
+    
     mkpath(plotsdir(plots_subdir))
 
     subs_blocking, subs_blocking_dims = subset_nda_dims(blocking_fp_arr, blocking_fp_axes, subset_range)
@@ -155,51 +152,10 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         "Metric" => [repeat(["E"], inner=nrow(unrolled_E_df)); repeat(["SI"], inner=nrow(unrolled_SI_df))]
     )
 
-    unrolled_SI_df.condition, SI_left, SI_right = max_percentile_conditions(unrolled_SI_df.SI)
-    unrolled_E_df.condition, E_left, E_right = max_percentile_conditions(unrolled_E_df.E)
-
-    condition_sorter = sorter("min", "mid", "max")
-    
     with_theme(violin_theme) do
-        fig = data(unrolled_SI_df) * mapping(:nonl_type, :SI) * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
-        save(plotsdir(plots_subdir, "stablefp_SI_violins.$(ext_2d)"), fig)
-
-        fig = data(unrolled_E_df) * mapping(:nonl_type, :E) * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
-        save(plotsdir(plots_subdir, "stablefp_E_violins.$(ext_2d)"), fig)
-
         fig = data(unrolled_df) * mapping("Metric", "FP value", color="Nonlinearity", side="Nonlinearity") * visual(Violin; bandwidth=0.003, npoints=256*16) |> draw
         save(plotsdir(plots_subdir, "stablefp_split_violins.$(ext_2d)"), fig)
     end
-
-    with_theme(bar_theme) do
-
-        SI_value_frequency = data(unrolled_SI_df) * histogram(bins=100) * mapping(:SI, layout=:nonl_type)
-        fig = draw(SI_value_frequency; axis)
-        save(plotsdir(plots_subdir, "stablefp_SI_histogram.$(ext_2d)"), fig)
-
-        E_value_frequency = data(unrolled_E_df) * histogram(bins=100) * mapping(:E, layout=:nonl_type)
-        fig = draw(E_value_frequency; axis)
-        save(plotsdir(plots_subdir, "stablefp_E_histogram.$(ext_2d)"), fig)
-
-        SI_condition_frequency = data(unrolled_SI_df) * frequency() * mapping(:nonl_type)
-        SI_stacks = SI_condition_frequency * mapping(color=:condition, stack=:condition => condition_sorter)
-        fig = draw(SI_stacks; axis=merge(axis, (title="seizure index ($(format_tail(SI_left)), $(format_tail(SI_right)))",)))
-        fig.figure.current_axis.x.xlabel = "inh. nonlinearity"
-        tightlimits!.(filter(x->x isa myMakie.Axis, contents(fig.figure.layout)))
-        save(plotsdir(plots_subdir, "stablefp_SI_distribution.$(ext_2d)"), fig)
-
-        ret_fig = fig
-
-        E_condition_frequency = data(unrolled_E_df) * frequency() * mapping(:nonl_type)
-        E_stacks = E_condition_frequency * mapping(color=:condition, stack=:condition => condition_sorter)
-        fig = draw(E_stacks; axis=merge(axis, (title="excitatory activity ($(format_tail(E_left)), $(format_tail(E_right)))",)))
-        fig.figure.current_axis.x.xlabel = "inh. nonlinearity"
-        tightlimits!.(filter(x->x isa myMakie.Axis, contents(fig.figure.layout)), Ref(Bottom()))
-        save(plotsdir(plots_subdir, "stablefp_E_distribution.$(ext_2d)"), fig)
-
-        ret_fig
-
-    end # bar_theme
 
     # with_theme(nullcline_theme) do
     #     fig = Figure()
@@ -214,10 +170,6 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
 
 
 end # let
-
-# tau_name_mapping = merge(DEFAULT_NAME_MAPPING, Dict(:τE => m -> m.τ[1], :τI => m -> m.τ[2]))
-
-# end # everywhere
 
 # # Low A, unitary alpha
 # let uniform_a = 50.,
@@ -246,7 +198,7 @@ let uniform_a = 5.,
         θE=1.25,
         firing_θI=2.0, blocking_θI=5.0
     ),
-    saved_lb=1., saved_ub=100., saved_len=global_saved_len,
+    saved_lb=1., saved_ub=20., saved_len=global_saved_len,
     subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len,
@@ -272,22 +224,22 @@ end
 # )
 # end
 
-# High-A non-unitary alpha
-let uniform_a = 5.,
-    mods=(
-        τ=(7.8, 7.8*4.4),
-        α=(0.4, 0.7), 
-        aE=uniform_a, firing_aI=uniform_a,
-        blocking_aI=uniform_a,
-        θE=1.25,
-        firing_θI=2.0, blocking_θI=5.0
-    ),
-    saved_lb=1., saved_ub=100., saved_len=global_saved_len,
-    subset_range=saved_lb..saved_ub;
-plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-    saved_len=saved_len,
-    session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha",
-    subset_range = subset_range
-)
-end
+# # High-A non-unitary alpha
+# let uniform_a = 5.,
+#     mods=(
+#         τ=(7.8, 7.8*4.4),
+#         α=(0.4, 0.7), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=1.25,
+#         firing_θI=2.0, blocking_θI=5.0
+#     ),
+#     saved_lb=1., saved_ub=20., saved_len=global_saved_len,
+#     subset_range=saved_lb..saved_ub;
+# plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#     saved_len=saved_len,
+#     session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
+#     subset_range = subset_range
+# )
+# end
 
