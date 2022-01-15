@@ -109,7 +109,8 @@ function fig_5_nullclines_differing_failure(;
     equals_target_dct = Dict(
         sym => n_sfp[sym] .== n_sfp_target[sym] for sym in keys(n_sfp_target)
     )
-    target_idxs = findall(reduce((x,y) -> x .&& y, values(equals_target_dct)));
+    and(x,y) = x && y
+    target_idxs = findall(reduce((x,y) -> and.(x,y), values(equals_target_dct)));
     isempty(target_idxs) && error("No sim with $(["$sym == $target" for (sym,target) ∈ pairs(n_sfp_target)]) SFP found.")
     target_idx = rand(target_idxs)
     target_coord = get_coordinate(Names, blocking_fp_axes, target_idx)
