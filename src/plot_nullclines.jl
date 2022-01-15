@@ -12,8 +12,9 @@ function lifted_wcm_param(;
 end
 
 function plot_nullclines!(fig::Figure, p::AbstractWCMNullclineParams, axis_length::Integer=100; kwargs...)
-    plot_nullclines!(fig, p, [range(0., 1., length=axis_length), range(0., 1., length=axis_length)]; kwargs...)
+    plot_nullclines!(fig, p, [range(-eps(Float64), 1. +eps(), length=axis_length), range(-eps(Float64), 1. +eps(), length=axis_length)]; kwargs...)
 end
+using LinearAlgebra
 function plot_nullclines!(fig::Figure, p::AbstractWCMNullclineParams, nullcline_axes::AbstractVector{<:AbstractVector};
         xlabel="E", ylabel="I", 
         title="",
@@ -58,6 +59,8 @@ function plot_nullclines!(fig::Figure, p::AbstractWCMNullclineParams, nullcline_
 
     if mark_fp
         fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
+        @show fixedpoints
+        @show eigvals.(NullclineAnalysis.fixedpoint_jac_val.(Ref(p), fixedpoints))
         stability = fixedpoint_stability.(Ref(p), fixedpoints)
         stability_marker = getindex.(Ref(NullclineAnalysis.STABILITY_MARKERS), stability)
         scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker,color=:darkgrey)

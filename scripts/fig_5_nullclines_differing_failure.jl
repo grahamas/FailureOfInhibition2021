@@ -23,25 +23,21 @@ function get_coordinate(names, axes, idx::Union{Tuple,Vector})
     end)
 end
 
-function plot_differing_failure(coord, mods; resolution, arrows_step)
+function plot_differing_failure(coord, mods, prototypes, titles; resolution, arrows_step)
     fig = Figure(resolution=resolution)
-    fig[1,1] = plot_nullclines!(fig,
-        get_nullcline_params(monotonic_prototype(; mods..., coord...));
-        arrows_step=arrows_step,
-        title = "firing"
-    )
-    fig[1,2] = plot_nullclines!(fig,
-        get_nullcline_params(blocking_prototype(; mods..., both_3sfp_coord...));
-        arrows_step=arrows_step,
-        title = "firing → failing"
-    )
-    hideydecorations!(content(fig[1,2]))
+    for (i,(key,title)) in enumerate(titles)
+        fig[1,i] = plot_nullclines!(fig,
+            get_nullcline_params(prototypes[key](; mods..., coord...));
+            arrows_step=arrows_step,
+            title = title
+        )
+    end
+    hideydecorations!.([content(fig[1,i]) for i ∈ 2:length(prototypes)])
     return fig
 end
 
 function fig_5_nullclines_differing_failure(; 
         mods, saved_lb, saved_ub, saved_len,
-        session_name="fig_5_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
         subset_range=saved_lb..saved_ub,
         name_mapping=DEFAULT_NAME_MAPPING,
         blocking_data = get_fp_arr_data("blocking", saved_lb, saved_ub, saved_len;
@@ -58,11 +54,11 @@ function fig_5_nullclines_differing_failure(;
         monotonic_fp_arr_unsubsetted::NDA = monotonic_data[1], 
         monotonic_fp_axes = monotonic_data[2], 
         monotonic_prototype_name = monotonic_data[4],
-        fp_axes_nt = Dict(
+        fp_axes_dct = Dict(
             Symbol("fire→fail")=>subset_axes(blocking_fp_axes, subset_range),
             :fire=>subset_axes(monotonic_fp_axes, subset_range)
         ),
-        fp_arr_nt = Dict(
+        fp_arr_dct = Dict(
                 Symbol("fire→fail")=>blocking_fp_arr_unsubsetted[
                     Aee=blocking_fp_axes.Aee .∈ subset_range,
                     Aei=blocking_fp_axes.Aei .∈ subset_range,
@@ -76,39 +72,51 @@ function fig_5_nullclines_differing_failure(;
                     Aii=monotonic_fp_axes.Aii .∈ subset_range
                 ]
             ),
-        nonl_types = keys(fp_axes_nt) |> Tuple,
-        prototype_name_nt = Dict(
+        nonl_types = keys(fp_axes_dct) |> Tuple,
+        prototype_name_dct = Dict(
             :fire=>monotonic_prototype_name,
             Symbol("fire→fail")=>blocking_prototype_name
         ),
+        title_pairs = [
+            :fire=>"fire",
+            Symbol("fire→fail")=>"firing → failing"
+        ],
         arrows_step=0.05,
-        session_id = "$(Dates.now())",
         axis = (width = 1800, height = 1000),
         figure_resolution = (1800,1000),
+        session_name="fig_5_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
+        session_id = "$(Dates.now())",
         plots_subdir = "$(session_name)_$(session_id)"
     ) where {Names,NDA<:NamedDimsArray{Names}}
-    mkpath(plotsdir(plots_subdir))
+    if !isdir(plotsdir(plots_subdir))
+        mkpath(plotsdir(plots_subdir))
+    end
 
-    blocking_fp_arr = fp_arr_nt[Symbol("fire→fail")];
-    monotonic_fp_arr = fp_arr_nt[:fire];
+    prototype_dct = Dict(
+        sym => get_prototype(prototype_name_dct[sym]) for sym in keys(fp_axes_dct)
+    )
+    n_sfp = Dict(
+        sym => count_stable_fps(fp_arr_dct[sym], fp_axes_dct[sym], prototype_dct[sym], mods) for sym ∈ keys(fp_axes_dct)
+    )
+    n_sfp_target = Dict(
+        Symbol("fire→fail") => 3
+    )
 
-    blocking_fp_axes = fp_axes_nt[Symbol("fire→fail")];
-    monotonic_fp_axes = fp_axes_nt[:fire];
+    for name in keys(n_sfp)
+        @info "$(name) extrema: $(extrema(n_sfp[name]))"
+    end
 
-    n_sfp_blocking = count_stable_fps(blocking_fp_arr, blocking_fp_axes, blocking_prototype, mods);
-    n_sfp_monotonic = count_stable_fps(monotonic_fp_arr, monotonic_fp_axes, monotonic_prototype, mods);
-
-    @show extrema(n_sfp_blocking)
-    @show extrema(n_sfp_monotonic)
-
-    target_idxs = findall(n_sfp_blocking .== 3);
-    isempty(target_idxs) && error("No sim with blocking 3 SFP found.")
+    equals_target_dct = Dict(
+        sym => n_sfp[sym] .== n_sfp_target[sym] for sym in keys(n_sfp_target)
+    )
+    target_idxs = findall(reduce((x,y) -> x .&& y, values(equals_target_dct)));
+    isempty(target_idxs) && error("No sim with $(["$sym == $target" for (sym,target) ∈ pairs(n_sfp_target)]) SFP found.")
     target_idx = rand(target_idxs)
     target_coord = get_coordinate(Names, blocking_fp_axes, target_idx)
     @show "Both: $target_coord"
 
     with_theme(nullcline_theme) do
-        differing_failure_fig = plot_differing_failure(target_coord, mods; resolution=figure_resolution, arrows_step=arrows_step)
+        differing_failure_fig = plot_differing_failure(target_coord, mods, prototype_dct, title_pairs; resolution=figure_resolution, arrows_step=arrows_step)
 
         save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure.$(ext_2d)"), differing_failure_fig)
     end # with_theme(nullcline_theme)
@@ -119,15 +127,57 @@ end # function fig_5
 let uniform_a = 5.,
     mods=(
         τ=(7.8, 7.8*4.4),
-        α=(1.0, 1.0), 
+        α=(0.4,0.7), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
         θE=1.25,
         firing_θI=2.0, blocking_θI=5.0
     ),
-    saved_lb=1., saved_ub=100., saved_len=10,
-    subset_range=saved_lb..saved_ub;
-    fig_5_nullclines_differing_failure(; mods=mods, 
-        saved_lb=saved_lb, saved_ub=saved_ub, saved_len=saved_len
+    saved_lb=1., saved_ub=20., saved_len=15,
+    subset_range=saved_lb..saved_ub,
+    name_mapping = DEFAULT_NAME_MAPPING,
+    session_name="fig_5_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
+    session_id = "$(Dates.now())",
+    plots_subdir = "$(session_name)_$(session_id)";
+    if !isdir(plotsdir(plots_subdir))
+        mkpath(plotsdir(plots_subdir))
+    end
+    # fig_5_nullclines_differing_failure(; mods=mods, 
+    #     saved_lb=saved_lb, saved_ub=saved_ub, saved_len=saved_len,
+    #     session_name=session_name, session_id=session_id, plots_subdir=plots_subdir
+    # )
+    prototype_name_dct = Dict(
+            :fire=>"full_dynamics_monotonic",
+            Symbol("fire→fail")=>"full_dynamics_blocking"
+        )
+    prototype_dct = Dict(
+        sym => get_prototype(name) for (sym, name) in pairs(prototype_name_dct)
     )
+    title_pairs = [
+            :fire=>"fire",
+            Symbol("fire→fail")=>"firing → failing"
+    ]
+    with_theme(nullcline_theme) do 
+        mod = (Aee=10., Aei=7., Aie=20., Aii=6., θE=1.5,
+        firing_θI=4.0, blocking_θI=12.0, τ=(7.8, 7.8))
+        mod1 = (Aie=18.5,)
+        mod2 = (Aie=17.,)
+        mod3 = (Aie=18.,)
+        mod4 = (Aie=19.,)
+
+        mod_fig = plot_differing_failure(merge(mod, mod), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod.$(ext_2d)"), mod_fig)
+
+        mod1_fig = plot_differing_failure(merge(mod, mod1), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod1.$(ext_2d)"), mod1_fig)
+
+        mod2_fig = plot_differing_failure(merge(mod, mod2), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod2.$(ext_2d)"), mod2_fig)
+
+        mod3_fig = plot_differing_failure(merge(mod, mod3), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod3.$(ext_2d)"), mod3_fig)
+
+        mod4_fig = plot_differing_failure(merge(mod, mod4), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod4.$(ext_2d)"), mod4_fig)
+    end
 end
