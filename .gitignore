@@ -419,3 +419,5 @@ $RECYCLE.BIN/
 # Many thanks to `https://gitignore.io/`, written and maintained by Joe Blau, which contributed much material to this gitignore file.
 *.pdf
 scripts/ERRORS.txt
+sync_data.sh
+backup_data

@@ -160,12 +160,14 @@ let uniform_a = 5.,
     ]
     with_theme(nullcline_theme) do 
         mod = (Aee=10., Aei=7., Aie=20., Aii=6., θE=1.5,
-        firing_θI=4.0, blocking_θI=12.0, τ=(7.8, 7.8))
-        mod1 = (Aie=18.5,)
-        mod2 = (Aie=17.,)
-        mod3 = (Aie=18.,)
-        mod4 = (Aie=19.,)
+        firing_θI=4.0, blocking_θI=12.0, τ=(7.8, 4.4*7.8),
+        α=(0.7,0.4),)
+        mod1 = (τ=(7.8, 0.5*7.8),)
+        mod2 = (τ=(7.8, 1.0*7.8),)
+        mod3 = (τ=(7.8, 1.5*7.8),)
+        mod4 = (τ=(7.8, 2.5*7.8),)
 
+        @show mod
         mod_fig = plot_differing_failure(merge(mod, mod), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
         save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod.$(ext_2d)"), mod_fig)
 

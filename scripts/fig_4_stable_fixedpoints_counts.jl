@@ -195,10 +195,10 @@ let uniform_a = 5.,
         α=(1.0, 1.0), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
-        θE=1.25,
-        firing_θI=2.0, blocking_θI=5.0
+        θE=1.5,
+        firing_θI=4., blocking_θI=12.0
     ),
-    saved_lb=1., saved_ub=20., saved_len=global_saved_len,
+    saved_lb=1., saved_ub=20., saved_len=4,
     subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len,
@@ -206,6 +206,25 @@ let uniform_a = 5.,
         subset_range = subset_range
     )
 end
+
+# # High-A unitary alpha
+# let uniform_a = 5.,
+#     mods=(
+#         τ=(7.8, 7.8*4.4),
+#         α=(1.0, 1.0), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=1.25,
+#         firing_θI=2.0, blocking_θI=5.0
+#     ),
+#     saved_lb=1., saved_ub=20., saved_len=global_saved_len,
+#     subset_range=saved_lb..saved_ub;
+#     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#         saved_len=saved_len,
+#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
+#         subset_range = subset_range
+#     )
+# end
 
 # # Low-A non-unitary alpha
 # let uniform_a = 50.,
