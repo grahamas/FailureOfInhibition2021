@@ -28,6 +28,11 @@ include(scriptsdir("load/he_sweep_arrs.jl"))
 
 global_saved_len=15
 
+# stupid broadcasting doesn't work in 1.6
+function ⋉(needles, haystack)
+    [needle ∈ haystack for needle in needles]
+end
+
 function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         subset_range=-Inf..Inf,
         name_mapping=DEFAULT_NAME_MAPPING,
@@ -51,16 +56,16 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         ),
         fp_arr_nt = Dict(
                 Symbol("fire→fail")=>blocking_fp_arr[
-                    Aee=blocking_fp_axes.Aee .∈ subset_range,
-                    Aei=blocking_fp_axes.Aei .∈ subset_range,
-                    Aie=blocking_fp_axes.Aie .∈ subset_range,
-                    Aii=blocking_fp_axes.Aii .∈ subset_range
+                    Aee=blocking_fp_axes.Aee ⋉ subset_range,
+                    Aei=blocking_fp_axes.Aei ⋉ subset_range,
+                    Aie=blocking_fp_axes.Aie ⋉ subset_range,
+                    Aii=blocking_fp_axes.Aii ⋉ subset_range
                 ],
                 :fire=>monotonic_fp_arr[
-                    Aee=monotonic_fp_axes.Aee .∈ subset_range,
-                    Aei=monotonic_fp_axes.Aei .∈ subset_range,
-                    Aie=monotonic_fp_axes.Aie .∈ subset_range,
-                    Aii=monotonic_fp_axes.Aii .∈ subset_range
+                    Aee=monotonic_fp_axes.Aee ⋉ subset_range,
+                    Aei=monotonic_fp_axes.Aei ⋉ subset_range,
+                    Aie=monotonic_fp_axes.Aie ⋉ subset_range,
+                    Aii=monotonic_fp_axes.Aii ⋉ subset_range
                 ]
             ),
         nonl_types = keys(fp_axes_nt) |> Tuple,
