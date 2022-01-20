@@ -59,7 +59,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
                 :fire=>monotonic_fp_arr[
                     Aee=monotonic_fp_axes.Aee .∈ subset_range,
                     Aei=monotonic_fp_axes.Aei .∈ subset_range,
-                    Aie4.4*=monotonic_fp_axes.Aie .∈ subset_range,
+                    Aie=monotonic_fp_axes.Aie .∈ subset_range,
                     Aii=monotonic_fp_axes.Aii .∈ subset_range
                 ]
             ),
@@ -202,8 +202,7 @@ let uniform_a = 5.,
     subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
-        subset_range = subset_range
+        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
     )
 end
 
