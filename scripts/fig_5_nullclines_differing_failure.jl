@@ -102,25 +102,29 @@ function fig_5_nullclines_differing_failure(;
     n_sfp = Dict(
         sym => count_stable_fps(fp_arr_dct[sym], fp_axes_dct[sym], prototype_dct[sym], mods) for sym ∈ keys(fp_axes_dct)
     )
-    n_sfp_conds = Dict(
-        Symbol("fire→fail") => sfp -> sfp >= 3,
-        Symbol("fire") => sfp -> sfp < 3 
+    n_fps = Dict(
+        sym => length.(fp_arr_dct[sym]) for sym ∈ keys(fp_axes_dct)
     )
-    n_sfp_conds_strs = Dict(
-        Symbol("fire→fail") => ">= 3",
-        Symbol("fire") => "< 3"
+    n_relevant_fps = n_fps
+    conds = Dict(
+        Symbol("fire→fail") => n -> n >= 7,
+        Symbol("fire") => n -> n >= 5 
+    )
+    conds_strs = Dict(
+        Symbol("fire→fail") => ">= 7",
+        Symbol("fire") => ">= 5"
     )
 
-    for name in keys(n_sfp)
-        @info "$(name) extrema: $(extrema(n_sfp[name]))"
+    for name in keys(n_relevant_fps)
+        @info "$(name) extrema: $(extrema(n_relevant_fps[name]))"
     end
 
     conds_satisfied_dct = Dict(
-        sym => n_sfp_conds[sym].(n_sfp[sym]) for sym in keys(n_sfp_conds)
+        sym => conds[sym].(n_relevant_fps[sym]) for sym in keys(conds)
     )
     and(x,y) = x && y
     target_idxs = findall(reduce((x,y) -> and.(x,y), values(conds_satisfied_dct)));
-    isempty(target_idxs) && error("No sim with $(["$sym $conds" for (sym,conds) ∈ pairs(n_sfp_conds_strs)]) SFP found.")
+    isempty(target_idxs) && error("No sim with $(["$sym $conds" for (sym,conds) ∈ pairs(conds_strs)]) relevant FPs found.")
     target_idx = rand(target_idxs)
     target_coord = get_coordinate(Names, blocking_fp_axes, target_idx)
     @show "Both: $target_coord"
@@ -128,7 +132,7 @@ function fig_5_nullclines_differing_failure(;
     with_theme(nullcline_theme) do
         differing_failure_fig = plot_differing_failure(target_coord, mods, prototype_dct, title_pairs; resolution=figure_resolution, arrows_step=arrows_step)
 
-        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure.$(ext_2d)"), differing_failure_fig)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_fps_5_7.$(ext_2d)"), differing_failure_fig)
     end # with_theme(nullcline_theme)
 end # function fig_5
 
@@ -146,7 +150,7 @@ let uniform_a = 5.,
     saved_lb=1., saved_ub=20., saved_len=15,
     subset_range=saved_lb..saved_ub,
     name_mapping = DEFAULT_NAME_MAPPING,
-    session_name="fig_5_nullclines_differing_failure_pass3_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
+    session_name="fig_5_nullclines_differing_failure_fps_5_7_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
     session_id = "$(Dates.now())",
     plots_subdir = "$(session_name)_$(session_id)";
     if !isdir(plotsdir(plots_subdir))
