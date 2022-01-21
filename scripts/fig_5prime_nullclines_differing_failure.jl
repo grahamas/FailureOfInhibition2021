@@ -102,25 +102,20 @@ function fig_5_nullclines_differing_failure(;
     n_sfp = Dict(
         sym => count_stable_fps(fp_arr_dct[sym], fp_axes_dct[sym], prototype_dct[sym], mods) for sym ∈ keys(fp_axes_dct)
     )
-    n_sfp_conds = Dict(
-        Symbol("fire→fail") => sfp -> sfp >= 3,
-        Symbol("fire") => sfp -> sfp < 3 
-    )
-    n_sfp_conds_strs = Dict(
-        Symbol("fire→fail") => ">= 3",
-        Symbol("fire") => "< 3"
+    n_sfp_target = Dict(
+        Symbol("fire→fail") => 3
     )
 
     for name in keys(n_sfp)
         @info "$(name) extrema: $(extrema(n_sfp[name]))"
     end
 
-    conds_satisfied_dct = Dict(
-        sym => n_sfp_conds[sym].(n_sfp[sym]) for sym in keys(n_sfp_conds)
+    equals_target_dct = Dict(
+        sym => n_sfp[sym] .== n_sfp_target[sym] for sym in keys(n_sfp_target)
     )
     and(x,y) = x && y
-    target_idxs = findall(reduce((x,y) -> and.(x,y), values(conds_satisfied_dct)));
-    isempty(target_idxs) && error("No sim with $(["$sym $conds" for (sym,conds) ∈ pairs(n_sfp_conds_strs)]) SFP found.")
+    target_idxs = findall(reduce((x,y) -> and.(x,y), values(equals_target_dct)));
+    isempty(target_idxs) && error("No sim with $(["$sym == $target" for (sym,target) ∈ pairs(n_sfp_target)]) SFP found.")
     target_idx = rand(target_idxs)
     target_coord = get_coordinate(Names, blocking_fp_axes, target_idx)
     @show "Both: $target_coord"
@@ -136,8 +131,8 @@ end # function fig_5
 # High-A unitary alpha
 let uniform_a = 5.,
     mods=(
-        τ=(7.8, 7.8),
-        α=(1.0,1.0), 
+        τ=(7.8, 7.8*4.4),
+        α=(0.4,0.7), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
         θE=1.5,
@@ -146,14 +141,52 @@ let uniform_a = 5.,
     saved_lb=1., saved_ub=20., saved_len=15,
     subset_range=saved_lb..saved_ub,
     name_mapping = DEFAULT_NAME_MAPPING,
-    session_name="fig_5_nullclines_differing_failure_pass3_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
+    session_name="fig_5_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
     session_id = "$(Dates.now())",
     plots_subdir = "$(session_name)_$(session_id)";
     if !isdir(plotsdir(plots_subdir))
         mkpath(plotsdir(plots_subdir))
     end
-    fig_5_nullclines_differing_failure(; mods=mods, 
-        saved_lb=saved_lb, saved_ub=saved_ub, saved_len=saved_len,
-        session_name=session_name, session_id=session_id, plots_subdir=plots_subdir
+    # fig_5_nullclines_differing_failure(; mods=mods, 
+    #     saved_lb=saved_lb, saved_ub=saved_ub, saved_len=saved_len,
+    #     session_name=session_name, session_id=session_id, plots_subdir=plots_subdir
+    # )
+    prototype_name_dct = Dict(
+            :fire=>"full_dynamics_monotonic",
+            Symbol("fire→fail")=>"full_dynamics_blocking"
+        )
+    prototype_dct = Dict(
+        sym => get_prototype(name) for (sym, name) in pairs(prototype_name_dct)
     )
+    title_pairs = [
+            :fire=>"fire",
+            Symbol("fire→fail")=>"firing → failing"
+    ]
+    with_theme(nullcline_theme) do 
+        mod = (
+            Aee=10., Aei=7., Aie=20., Aii=6., θE=1.5,
+            firing_θI=4.0, blocking_θI=12.0, τ=(7.8, 7.8),
+            α=(.4,.7)
+        )
+        mod1 = (Aee=11.0,)
+        mod2 = (Aee=12.0,)
+        mod3 = (Aee=13.0,)
+        mod4 = (Aee=11.5,)
+
+        @show mod
+        mod_fig = plot_differing_failure(merge(mod, mod), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod.$(ext_2d)"), mod_fig)
+
+        mod1_fig = plot_differing_failure(merge(mod, mod1), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod1.$(ext_2d)"), mod1_fig)
+
+        mod2_fig = plot_differing_failure(merge(mod, mod2), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod2.$(ext_2d)"), mod2_fig)
+
+        mod3_fig = plot_differing_failure(merge(mod, mod3), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod3.$(ext_2d)"), mod3_fig)
+
+        mod4_fig = plot_differing_failure(merge(mod, mod4), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
+        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod4.$(ext_2d)"), mod4_fig)
+    end
 end

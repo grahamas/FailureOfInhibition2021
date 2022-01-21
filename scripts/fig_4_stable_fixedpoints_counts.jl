@@ -194,26 +194,58 @@ end # let
 # end
 
 # High-A unitary alpha
-let uniform_a = 5.,
-    mods=(
-        τ=(7.8, 7.8*4.4),
-        α=(1.0, 1.0), 
-        aE=uniform_a, firing_aI=uniform_a,
-        blocking_aI=uniform_a,
-        θE=1.5,
-        firing_θI=4., blocking_θI=12.0
-    ),
-    saved_lb=1., saved_ub=20., saved_len=4,
-    subset_range=saved_lb..saved_ub;
-    plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-        saved_len=saved_len,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
-    )
-end
+# let uniform_a = 5.,
+#     mods=(
+#         τ=(7.8, 7.8*4.4),
+#         α=(1.0, 1.0), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=1.5,
+#         firing_θI=4., blocking_θI=12.0
+#     ),
+#     saved_lb=1., saved_ub=20., saved_len=4,
+#     subset_range=saved_lb..saved_ub;
+#     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#         saved_len=saved_len,
+#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+#     )
+# end
+# let uniform_a = 5.,
+#     mods=(
+#         τ=(7.8, 7.8),
+#         α=(1.0, 1.0), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=1.5,
+#         firing_θI=4., blocking_θI=8.0
+#     ),
+#     saved_lb=1., saved_ub=20., saved_len=15,
+#     subset_range=saved_lb..saved_ub;
+#     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#         saved_len=saved_len,
+#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+#     )
+# end
+# let uniform_a = 5.,
+#     mods=(
+#         τ=(7.8, 7.8*4.4),
+#         α=(1.0, 1.0), 
+#         aE=uniform_a, firing_aI=uniform_a,
+#         blocking_aI=uniform_a,
+#         θE=1.5,
+#         firing_θI=4., blocking_θI=8.0
+#     ),
+#     saved_lb=1., saved_ub=20., saved_len=15,
+#     subset_range=saved_lb..saved_ub;
+#     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+#         saved_len=saved_len,
+#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+#     )
+# end
 let uniform_a = 5.,
     mods=(
         τ=(7.8, 7.8),
-        α=(1.0, 1.0), 
+        α=(0.4,0.7), 
         aE=uniform_a, firing_aI=uniform_a,
         blocking_aI=uniform_a,
         θE=1.5,
@@ -223,24 +255,25 @@ let uniform_a = 5.,
     subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
     )
 end
+
 let uniform_a = 5.,
-    mods=(
-        τ=(7.8, 7.8*4.4),
-        α=(1.0, 1.0), 
-        aE=uniform_a, firing_aI=uniform_a,
-        blocking_aI=uniform_a,
-        θE=1.5,
-        firing_θI=4., blocking_θI=8.0
-    ),
-    saved_lb=1., saved_ub=20., saved_len=15,
-    subset_range=saved_lb..saved_ub;
-    plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
-        saved_len=saved_len,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
-    )
+mods=(
+    τ=(7.8, 7.8*4.4),
+    α=(0.4,0.7), 
+    aE=uniform_a, firing_aI=uniform_a,
+    blocking_aI=uniform_a,
+    θE=1.5,
+    firing_θI=4., blocking_θI=8.0
+),
+saved_lb=1., saved_ub=20., saved_len=15,
+subset_range=saved_lb..saved_ub;
+plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
+    saved_len=saved_len,
+    session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+)
 end
 
 # # High-A unitary alpha

@@ -59,8 +59,6 @@ function plot_nullclines!(fig::Figure, p::AbstractWCMNullclineParams, nullcline_
 
     if mark_fp
         fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
-        @show fixedpoints
-        @show eigvals.(NullclineAnalysis.fixedpoint_jac_val.(Ref(p), fixedpoints))
         stability = fixedpoint_stability.(Ref(p), fixedpoints)
         stability_marker = getindex.(Ref(NullclineAnalysis.STABILITY_MARKERS), stability)
         scatter!(ax, Point2f0.(fixedpoints), marker=stability_marker,color=:darkgrey)
