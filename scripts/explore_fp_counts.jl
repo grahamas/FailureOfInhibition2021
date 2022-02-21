@@ -1,5 +1,5 @@
 using DrWatson
-quickactivate("FailureOfInhibition2021")
+quickactivate("FailureOfInhibition2022")
 
 # @everywhere begin
 using TravelingWaveSimulations, WilsonCowanModel, Simulation73,

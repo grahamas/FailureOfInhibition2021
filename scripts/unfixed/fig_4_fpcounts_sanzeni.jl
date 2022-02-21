@@ -1,5 +1,5 @@
 using DrWatson
-@quickactivate "FailureOfInhibition2021"
+@quickactivate "FailureOfInhibition2022"
 using TravelingWaveSimulations, WilsonCowanModel, 
     TravelingWaveSimulationsPlotting, 
     Simulation73Plotting, Simulation73

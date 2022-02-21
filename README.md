@@ -1,8 +1,8 @@
-# FailureOfInhibition2021
+# FailureOfInhibition2022
 
 This code base is using the Julia Language and [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
 to make a reproducible scientific project named
-> FailureOfInhibition2021
+> FailureOfInhibition2022
 
 To (locally) reproduce this project, do the following:
 

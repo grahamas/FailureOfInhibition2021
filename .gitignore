@@ -421,3 +421,5 @@ $RECYCLE.BIN/
 scripts/ERRORS.txt
 sync_data.sh
 backup_data
+
+Manifest.toml

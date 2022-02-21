@@ -1,4 +1,4 @@
-@quickactivate "FailureOfInhibition2021"
+@quickactivate "FailureOfInhibition2022"
 
 using Makie
 using GLMakie; ext_2d = "png"; GLMakie.activate!()

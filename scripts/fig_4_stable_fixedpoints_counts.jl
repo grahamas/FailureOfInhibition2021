@@ -4,7 +4,7 @@ n_threaded_workers = floor(Int, n_cores / Base.Threads.nthreads())
 # addprocs(n_threaded_workers - nworkers())
 # @show nprocs()
 using DrWatson
-quickactivate(@__DIR__, "FailureOfInhibition2021")
+quickactivate(@__DIR__, "FailureOfInhibition2022")
 using Pkg
 Pkg.instantiate()
 
