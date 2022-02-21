@@ -6,7 +6,7 @@ using GLMakie; ext_2d = "png"; GLMakie.activate!()
 using DrWatson, Dates
 using Colors
 
-let figure_name = "fig_3_nonlinearity_derivation",
+let figure_name = "fig_nonlinearity_derivation",
     N = 1000,
     fig_resolution=(800,600),
     simple_theme = Theme(
@@ -23,7 +23,7 @@ let figure_name = "fig_3_nonlinearity_derivation",
             ygridcolor = RGBA(1.,1.,1.,0.),
         )
     ),
-    session_name = "fig_3_nonlinearity_derivation",
+    session_name = "fig_nonlinearity_derivation",
     session_id = "$(Dates.now())",
     plots_subdir = "$(session_name)_$(session_id)"
 ; 

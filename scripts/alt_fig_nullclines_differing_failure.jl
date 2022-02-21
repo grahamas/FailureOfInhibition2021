@@ -40,7 +40,7 @@ function ⋉(needles, haystack)
     [needle ∈ haystack for needle in needles]
 end
 
-function fig_5_nullclines_differing_failure(; 
+function fig_nullclines_differing_failure(; 
         mods, saved_lb, saved_ub, saved_len,
         subset_range=saved_lb..saved_ub,
         name_mapping=DEFAULT_NAME_MAPPING,
@@ -88,7 +88,7 @@ function fig_5_nullclines_differing_failure(;
         arrows_step=0.05,
         axis = (width = 1800, height = 1000),
         figure_resolution = (1800,1000),
-        session_name="fig_5_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
+        session_name="fig_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
         session_id = "$(Dates.now())",
         plots_subdir = "$(session_name)_$(session_id)"
     ) where {Names,NDA<:NamedDimsArray{Names}}
@@ -123,9 +123,9 @@ function fig_5_nullclines_differing_failure(;
     with_theme(nullcline_theme) do
         differing_failure_fig = plot_differing_failure(target_coord, mods, prototype_dct, title_pairs; resolution=figure_resolution, arrows_step=arrows_step)
 
-        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure.$(ext_2d)"), differing_failure_fig)
+        save(plotsdir(plots_subdir, "fig_nullclines_differing_failure.$(ext_2d)"), differing_failure_fig)
     end # with_theme(nullcline_theme)
-end # function fig_5
+end # function fig
 
 
 # High-A unitary alpha
@@ -141,13 +141,13 @@ let uniform_a = 5.,
     saved_lb=1., saved_ub=20., saved_len=15,
     subset_range=saved_lb..saved_ub,
     name_mapping = DEFAULT_NAME_MAPPING,
-    session_name="fig_5_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
+    session_name="fig_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
     session_id = "$(Dates.now())",
     plots_subdir = "$(session_name)_$(session_id)";
     if !isdir(plotsdir(plots_subdir))
         mkpath(plotsdir(plots_subdir))
     end
-    # fig_5_nullclines_differing_failure(; mods=mods, 
+    # fig_nullclines_differing_failure(; mods=mods, 
     #     saved_lb=saved_lb, saved_ub=saved_ub, saved_len=saved_len,
     #     session_name=session_name, session_id=session_id, plots_subdir=plots_subdir
     # )
@@ -175,18 +175,18 @@ let uniform_a = 5.,
 
         @show mod
         mod_fig = plot_differing_failure(merge(mod, mod), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
-        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod.$(ext_2d)"), mod_fig)
+        save(plotsdir(plots_subdir, "fig_nullclines_differing_failure_$mod.$(ext_2d)"), mod_fig)
 
         mod1_fig = plot_differing_failure(merge(mod, mod1), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
-        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod1.$(ext_2d)"), mod1_fig)
+        save(plotsdir(plots_subdir, "fig_nullclines_differing_failure_$mod1.$(ext_2d)"), mod1_fig)
 
         mod2_fig = plot_differing_failure(merge(mod, mod2), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
-        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod2.$(ext_2d)"), mod2_fig)
+        save(plotsdir(plots_subdir, "fig_nullclines_differing_failure_$mod2.$(ext_2d)"), mod2_fig)
 
         mod3_fig = plot_differing_failure(merge(mod, mod3), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
-        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod3.$(ext_2d)"), mod3_fig)
+        save(plotsdir(plots_subdir, "fig_nullclines_differing_failure_$mod3.$(ext_2d)"), mod3_fig)
 
         mod4_fig = plot_differing_failure(merge(mod, mod4), mods, prototype_dct, title_pairs; resolution=(1800,1000), arrows_step=0.05)
-        save(plotsdir(plots_subdir, "fig_5_nullclines_differing_failure_$mod4.$(ext_2d)"), mod4_fig)
+        save(plotsdir(plots_subdir, "fig_nullclines_differing_failure_$mod4.$(ext_2d)"), mod4_fig)
     end
 end

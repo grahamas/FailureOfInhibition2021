@@ -74,7 +74,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
             Symbol("fire→fail")=>blocking_prototype_name
         ),
         arrows_step=0.05,
-        session_name = "fig_4_stable_fixedpoints_counts_nicolas",
+        session_name = "fig_stable_fixedpoints_counts_nicolas",
         session_id = "$(Dates.now())",
         axis = (width = 1600, height = 1600),
         plots_subdir = "$(session_name)_$(session_id)"
@@ -191,7 +191,7 @@ end # let
 #         subset_range=saved_lb..saved_ub;
 #     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #         saved_len=saved_len, 
-#         session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
+#         session_name="fig_stable_fixedpoints_counts_loA_unitAlpha"
 #     )
 # end
 
@@ -209,7 +209,7 @@ end # let
 #     subset_range=saved_lb..saved_ub;
 #     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #         saved_len=saved_len,
-#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+#         session_name="fig_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
 #     )
 # end
 # let uniform_a = 5.,
@@ -225,7 +225,7 @@ end # let
 #     subset_range=saved_lb..saved_ub;
 #     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #         saved_len=saved_len,
-#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+#         session_name="fig_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
 #     )
 # end
 # let uniform_a = 5.,
@@ -241,7 +241,7 @@ end # let
 #     subset_range=saved_lb..saved_ub;
 #     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #         saved_len=saved_len,
-#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+#         session_name="fig_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
 #     )
 # end
 # first_df = let uniform_a = 5.,
@@ -257,7 +257,7 @@ end # let
 #     subset_range=saved_lb..saved_ub;
 #     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #         saved_len=saved_len,
-#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+#         session_name="fig_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
 #     )
 # end
 
@@ -274,7 +274,7 @@ second_df = let uniform_a = 5.,
     subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len,
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
+        session_name="fig_stable_fixedpoints_counts_exhiA_unitAlpha_τ=$(mods.τ[2]/mods.τ[1])_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)"
     )
 end
 
@@ -292,7 +292,7 @@ end
 #     subset_range=saved_lb..saved_ub;
 #     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #         saved_len=saved_len,
-#         session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
+#         session_name="fig_stable_fixedpoints_counts_exhiA_unitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
 #         subset_range = subset_range
 #     )
 # end
@@ -310,7 +310,7 @@ end
 #     subset_range=saved_lb..saved_ub;
 # plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #     saved_len=saved_len, 
-#     session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
+#     session_name="fig_stable_fixedpoints_counts_loA_nonunitAlpha"
 # )
 # end
 
@@ -328,7 +328,7 @@ end
 #     subset_range=saved_lb..saved_ub;
 # plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #     saved_len=saved_len,
-#     session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
+#     session_name="fig_stable_fixedpoints_counts_exhiA_nonunitAlpha_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)",
 #     subset_range = subset_range
 # )
 # end

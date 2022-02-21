@@ -21,7 +21,7 @@ function plot_nullclines_differing_balanced_state(;
         sweep_subset_range = -Inf..Inf,
         mods, name_mapping=DEFAULT_NAME_MAPPING,
         arrows_step=0.05, 
-        session_name = "fig_6_nullclines_differing_balanced_state",
+        session_name = "fig_nullclines_differing_balanced_state",
         session_id = "$(Dates.now())",
         plots_subdir = "$(session_name)_$(session_id)",
         figure_resolution=(1800,1000)
@@ -68,7 +68,7 @@ function plot_nullclines_differing_balanced_state(;
     )
     hideydecorations!(fig[1,2] |> content)
 
-    TravelingWaveSimulationsPlotting._save!(fig, "fig_6_nullclines_differing_balanced_state.$(ext_2d)"; plots_subdir=plots_subdir)
+    TravelingWaveSimulationsPlotting._save!(fig, "fig_nullclines_differing_balanced_state.$(ext_2d)"; plots_subdir=plots_subdir)
 
     end # with_theme(nullcline_theme)
 end # function

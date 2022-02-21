@@ -92,7 +92,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         #     n_lattice = 2,
         #     save_idxs=nothing, save_on=false, saveat=0.1
         # ),
-        session_name = "fig_4_stable_fixedpoints_counts_erf",
+        session_name = "fig_stable_fixedpoints_counts_erf",
         session_id = "$(Dates.now())",
         axis = (width = 800, height = 800),
         bar_theme = Theme(
@@ -265,7 +265,7 @@ let uniform_a = 50.,
         subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len, 
-        session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
+        session_name="fig_stable_fixedpoints_counts_loA_unitAlpha"
     )
 end
 
@@ -282,7 +282,7 @@ let uniform_a = 5.,
         subset_range=saved_lb..saved_ub;
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len, 
-        session_name="fig_4_stable_fixedpoints_counts_exhiA_unitAlpha"
+        session_name="fig_stable_fixedpoints_counts_exhiA_unitAlpha"
     )
 end
 
@@ -299,7 +299,7 @@ let uniform_a = 50.,
     subset_range=saved_lb..saved_ub;
 plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
     saved_len=saved_len, 
-    session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
+    session_name="fig_stable_fixedpoints_counts_loA_nonunitAlpha"
 )
 end
 
@@ -316,7 +316,7 @@ let uniform_a = 5.,
     subset_range=saved_lb..saved_ub;
 plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
     saved_len=saved_len, 
-    session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha"
+    session_name="fig_stable_fixedpoints_counts_exhiA_nonunitAlpha"
 )
 end
 

@@ -86,7 +86,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
             :fire=>monotonic_prototype_name,
             Symbol("fire→fail")=>blocking_prototype_name
         ),
-        session_name = "fig_4_fpcounts_tau",
+        session_name = "fig_fpcounts_tau",
         session_id = "$(Dates.now())",
         axis = (width = 800, height = 800),
         bar_theme = Theme(
@@ -269,7 +269,7 @@ for τI ∈ [0.4, 0.8, 1.4, 15.]
 #         subset_range=saved_lb..saved_ub;
 #     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #         saved_len=saved_len, 
-#         session_name="fig_4_stable_fixedpoints_counts_loA_unitAlpha"
+#         session_name="fig_stable_fixedpoints_counts_loA_unitAlpha"
 #     )
 # end
 
@@ -288,7 +288,7 @@ let uniform_a = 5.,
     plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
         saved_len=saved_len,
         name_mapping=tau_name_mapping,
-        session_name="fig_4_stable_fixedpoints_counts_hiA_unitAlpha_τ$τI"
+        session_name="fig_stable_fixedpoints_counts_hiA_unitAlpha_τ$τI"
     )
 end
 
@@ -306,7 +306,7 @@ end
 #     subset_range=saved_lb..saved_ub;
 # plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #     saved_len=saved_len, 
-#     session_name="fig_4_stable_fixedpoints_counts_loA_nonunitAlpha"
+#     session_name="fig_stable_fixedpoints_counts_loA_nonunitAlpha"
 # )
 # end
 
@@ -324,7 +324,7 @@ end
 #     subset_range=saved_lb..saved_ub;
 # plot_stable_fixedpoints_counts(mods; saved_lb=saved_lb, saved_ub=saved_ub,
 #     saved_len=saved_len, 
-#     session_name="fig_4_stable_fixedpoints_counts_exhiA_nonunitAlpha"
+#     session_name="fig_stable_fixedpoints_counts_exhiA_nonunitAlpha"
 # end
 
 end

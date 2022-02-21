@@ -18,10 +18,10 @@ using Memoize
 include(srcdir("estimate_params.jl"))
 include(srcdir("theme.jl"))
 
-fig_2_results_df = let μ_on=0., 
+fig_results_df = let μ_on=0., 
     σ_on=0.04:0.02:0.24,
     μ_off=0.5:0.05:1., σ_off=0.04:0.02:0.24,
-    session_name = "fig_2_compare_failure_models",
+    session_name = "fig_compare_failure_models",
     session_id = "$(Dates.now())",
     plots_subdir = "$(session_name)_$(session_id)",
     figure_resolution=(2000, 1800),
