@@ -6,6 +6,7 @@ to make a reproducible scientific project named
 
 To (locally) reproduce this project, do the following:
 
+0. Install DrWatson in Julia: `julia>] add DrWatson`
 1. Download this code base (preferably via `git clone`)
 2. Open a Julia console and do:
    ```
