@@ -21,7 +21,7 @@ let blocking_prototype_name = "full_dynamics_blocking",
         save_idxs=nothing, save_on=false, saveat=0.1
     ),
     session_name = "pharmacology_phase_spaces_arrows_$(ext_2d)",
-    session_id = "$(Dates.now())",
+    session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
     figure_resolution=(800,800),
     simple_theme = Theme(
         Lines = (

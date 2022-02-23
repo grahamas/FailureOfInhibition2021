@@ -1,4 +1,4 @@
-using Contour
+using Contour, GeometryTypes
 
 function lifted_wcm_param(;
     Aee=1., Aie=1., Aei=1.5, Aii=0.25,

@@ -22,10 +22,10 @@ fig_results_df = let μ_on=0.,
     σ_on=0.04:0.02:0.24,
     μ_off=0.5:0.05:1., σ_off=0.04:0.02:0.24,
     session_name = "fig_compare_failure_models",
-    session_id = "$(Dates.now())",
+    session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
     plots_subdir = "$(session_name)_$(session_id)",
     figure_resolution=(2000, 1800),
-    file_type="png"
+    file_type="eps"
 ;
 dims = (
     # μ_on = μ_on, 
@@ -95,10 +95,10 @@ with_theme(model_comparison_theme) do
     Gaussian RMSE: $(Optim.minimum(narrow_transσ_result.fits.meijer))"""
 
     noto_sans_bold = assetpath("fonts", "NotoSans-Bold.ttf")
-    label_a = fig[1,1,TopLeft()] = Label(fig, "A", font=noto_sans_bold, halign=:left)
-    label_b = fig[1,2,TopLeft()] = Label(fig, "B", font=noto_sans_bold, halign=:left)
-    label_c = fig[2,1,TopLeft()] = Label(fig, "C", font=noto_sans_bold, halign=:left)
-    label_d = fig[2,2,TopLeft()] = Label(fig, "D", font=noto_sans_bold, halign=:left)
+    label_a = fig[1,1,TopLeft()] = Label(fig, "a", font=noto_sans_bold, halign=:left)
+    label_b = fig[1,2,TopLeft()] = Label(fig, "b", font=noto_sans_bold, halign=:left)
+    label_c = fig[2,1,TopLeft()] = Label(fig, "c", font=noto_sans_bold, halign=:left)
+    label_d = fig[2,2,TopLeft()] = Label(fig, "d", font=noto_sans_bold, halign=:left)
     three_model_pairs = [(name, getproperty(THREE_MODELS,name)) for name ∈ three_models_order]
     plot_example_result!(wide_idσ_ax, wide_idσ_result, three_model_pairs)
     plot_example_result!(wide_transσ_ax, wide_transσ_result, three_model_pairs)

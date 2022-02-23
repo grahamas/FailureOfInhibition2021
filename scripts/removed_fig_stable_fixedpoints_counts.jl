@@ -75,7 +75,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         ),
         arrows_step=0.05,
         session_name = "fig_stable_fixedpoints_counts_nicolas",
-        session_id = "$(Dates.now())",
+        session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
         axis = (width = 1600, height = 1600),
         plots_subdir = "$(session_name)_$(session_id)"
     )

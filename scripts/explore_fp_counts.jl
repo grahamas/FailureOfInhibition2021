@@ -59,7 +59,7 @@ function explore_fp_counts(;
         sweep_subset_range = -Inf..Inf,
         mods, name_mapping=DEFAULT_NAME_MAPPING,
         session_name = "explore_fp_counts",
-        session_id = "$(Dates.now())",
+        session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
         plots_subdir = "$(session_name)_$(session_id)",
         figure_resolution=(800,800)
     )

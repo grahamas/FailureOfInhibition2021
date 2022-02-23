@@ -5,7 +5,7 @@ using TravelingWaveSimulations, WilsonCowanModel,
     NullclineAnalysis
 using Dates
 #using GLMakie; ext_2d = "png"; GLMakie.activate!()
-using CairoMakie; ext_2d = "svg"; CairoMakie.activate!()
+using CairoMakie; ext_2d = "eps"; CairoMakie.activate!()
 using NamedDims, NamedDimsHelpers
 
 include(srcdir("helpers.jl"))
@@ -14,6 +14,8 @@ include(srcdir("sweep.jl"))
 include(srcdir("metrics.jl"))
 include(srcdir("plot_nullclines.jl"))
 include(scriptsdir("load/he_sweep_arrs.jl"))
+
+noto_sans_bold = assetpath("fonts", "NotoSans-Bold.ttf")
 
 get_coordinate(names, axes, idx::CartesianIndex) = get_coordinate(names, axes, Tuple(idx))
 function get_coordinate(names, axes, idx::Union{Tuple,Vector})
@@ -33,6 +35,8 @@ function plot_differing_failure(coord, mods, prototypes, titles; resolution, arr
         )
     end
     hideydecorations!.([content(fig[1,i]) for i ∈ 2:length(prototypes)])
+    label_a = fig[1,1,TopLeft()] = Label(fig, "a", font=noto_sans_bold, halign=:left)
+    label_b = fig[1,2,TopLeft()] = Label(fig, "b", font=noto_sans_bold, halign=:left)
     return fig
 end
 
@@ -44,39 +48,39 @@ function fig_nullclines_differing_failure(;
         mods, saved_lb, saved_ub, saved_len,
         subset_range=saved_lb..saved_ub,
         name_mapping=DEFAULT_NAME_MAPPING,
-        blocking_data = get_fp_arr_data("blocking", saved_lb, saved_ub, saved_len;
-                mods=mods,
-                name_mapping=name_mapping
-            ), 
-        monotonic_data = get_fp_arr_data("monotonic", saved_lb, saved_ub, saved_len;
-                mods=mods,
-                name_mapping=name_mapping
-            ),
-        blocking_fp_arr_unsubsetted::NDA = blocking_data[1], 
-        blocking_fp_axes = blocking_data[2], 
-        blocking_prototype_name = blocking_data[4],
-        monotonic_fp_arr_unsubsetted::NDA = monotonic_data[1], 
-        monotonic_fp_axes = monotonic_data[2], 
-        monotonic_prototype_name = monotonic_data[4],
-        fp_axes_dct = Dict(
-            Symbol("fire→fail")=>subset_axes(blocking_fp_axes, subset_range),
-            :fire=>subset_axes(monotonic_fp_axes, subset_range)
-        ),
-        fp_arr_dct = Dict(
-                Symbol("fire→fail")=>blocking_fp_arr_unsubsetted[
-                    Aee=blocking_fp_axes.Aee ⋉ subset_range,
-                    Aei=blocking_fp_axes.Aei ⋉ subset_range,
-                    Aie=blocking_fp_axes.Aie ⋉ subset_range,
-                    Aii=blocking_fp_axes.Aii ⋉ subset_range
-                ],
-                :fire=>monotonic_fp_arr_unsubsetted[
-                    Aee=monotonic_fp_axes.Aee ⋉ subset_range,
-                    Aei=monotonic_fp_axes.Aei ⋉ subset_range,
-                    Aie=monotonic_fp_axes.Aie ⋉ subset_range,
-                    Aii=monotonic_fp_axes.Aii ⋉ subset_range
-                ]
-            ),
-        nonl_types = keys(fp_axes_dct) |> Tuple,
+        # blocking_data = get_fp_arr_data("blocking", saved_lb, saved_ub, saved_len;
+        #         mods=mods,
+        #         name_mapping=name_mapping
+        #     ), 
+        # monotonic_data = get_fp_arr_data("monotonic", saved_lb, saved_ub, saved_len;
+        #         mods=mods,
+        #         name_mapping=name_mapping
+        #     ),
+        # blocking_fp_arr_unsubsetted::NDA = blocking_data[1], 
+        # blocking_fp_axes = blocking_data[2], 
+        blocking_prototype_name = "full_dynamics_blocking",#blocking_data[4],
+        # monotonic_fp_arr_unsubsetted::NDA = monotonic_data[1], 
+        # monotonic_fp_axes = monotonic_data[2], 
+        monotonic_prototype_name = "full_dynamics_monotonic",#monotonic_data[4],
+        # fp_axes_dct = Dict(
+        #     Symbol("fire→fail")=>subset_axes(blocking_fp_axes, subset_range),
+        #     :fire=>subset_axes(monotonic_fp_axes, subset_range)
+        # ),
+        # fp_arr_dct = Dict(
+        #         Symbol("fire→fail")=>blocking_fp_arr_unsubsetted[
+        #             Aee=blocking_fp_axes.Aee ⋉ subset_range,
+        #             Aei=blocking_fp_axes.Aei ⋉ subset_range,
+        #             Aie=blocking_fp_axes.Aie ⋉ subset_range,
+        #             Aii=blocking_fp_axes.Aii ⋉ subset_range
+        #         ],
+        #         :fire=>monotonic_fp_arr_unsubsetted[
+        #             Aee=monotonic_fp_axes.Aee ⋉ subset_range,
+        #             Aei=monotonic_fp_axes.Aei ⋉ subset_range,
+        #             Aie=monotonic_fp_axes.Aie ⋉ subset_range,
+        #             Aii=monotonic_fp_axes.Aii ⋉ subset_range
+        #         ]
+        #     ),
+        # nonl_types = keys(fp_axes_dct) |> Tuple,
         prototype_name_dct = Dict(
             :fire=>monotonic_prototype_name,
             Symbol("fire→fail")=>blocking_prototype_name
@@ -89,7 +93,7 @@ function fig_nullclines_differing_failure(;
         axis = (width = 1800, height = 1000),
         figure_resolution = (1800,1000),
         session_name="fig_nullclines_differing_failure_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
-        session_id = "$(Dates.now())",
+        session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
         plots_subdir = "$(session_name)_$(session_id)"
     ) where {Names,NDA<:NamedDimsArray{Names}}
     if !isdir(plotsdir(plots_subdir))
@@ -97,36 +101,37 @@ function fig_nullclines_differing_failure(;
     end
 
     prototype_dct = Dict(
-        sym => get_prototype(prototype_name_dct[sym]) for sym in keys(fp_axes_dct)
+        sym => get_prototype(prototype_name_dct[sym]) for sym in keys(prototype_name_dct)
     )
-    n_sfp = Dict(
-        sym => count_stable_fps(fp_arr_dct[sym], fp_axes_dct[sym], prototype_dct[sym], mods) for sym ∈ keys(fp_axes_dct)
-    )
-    n_fps = Dict(
-        sym => length.(fp_arr_dct[sym]) for sym ∈ keys(fp_axes_dct)
-    )
-    n_relevant_fps = n_fps
-    conds = Dict(
-        Symbol("fire→fail") => n -> n >= 7,
-        Symbol("fire") => n -> n >= 5 
-    )
-    conds_strs = Dict(
-        Symbol("fire→fail") => ">= 7",
-        Symbol("fire") => ">= 5"
-    )
+    # n_sfp = Dict(
+    #     sym => count_stable_fps(fp_arr_dct[sym], fp_axes_dct[sym], prototype_dct[sym], mods) for sym ∈ keys(fp_axes_dct)
+    # )
+    # n_fps = Dict(
+    #     sym => length.(fp_arr_dct[sym]) for sym ∈ keys(fp_axes_dct)
+    # )
+    # n_relevant_fps = n_fps
+    # conds = Dict(
+    #     Symbol("fire→fail") => n -> n >= 7,
+    #     Symbol("fire") => n -> n >= 5 
+    # )
+    # conds_strs = Dict(
+    #     Symbol("fire→fail") => ">= 7",
+    #     Symbol("fire") => ">= 5"
+    # )
 
-    for name in keys(n_relevant_fps)
-        @info "$(name) extrema: $(extrema(n_relevant_fps[name]))"
-    end
+    # for name in keys(n_relevant_fps)
+    #     @info "$(name) extrema: $(extrema(n_relevant_fps[name]))"
+    # end
 
-    conds_satisfied_dct = Dict(
-        sym => conds[sym].(n_relevant_fps[sym]) for sym in keys(conds)
-    )
-    and(x,y) = x && y
-    target_idxs = findall(reduce((x,y) -> and.(x,y), values(conds_satisfied_dct)));
-    isempty(target_idxs) && error("No sim with $(["$sym $conds" for (sym,conds) ∈ pairs(conds_strs)]) relevant FPs found.")
-    target_idx = rand(target_idxs)
-    target_coord = get_coordinate(Names, blocking_fp_axes, target_idx)
+    # conds_satisfied_dct = Dict(
+    #     sym => conds[sym].(n_relevant_fps[sym]) for sym in keys(conds)
+    # )
+    # and(x,y) = x && y
+    # target_idxs = findall(reduce((x,y) -> and.(x,y), values(conds_satisfied_dct)));
+    # isempty(target_idxs) && error("No sim with $(["$sym $conds" for (sym,conds) ∈ pairs(conds_strs)]) relevant FPs found.")
+    # target_idx = rand(target_idxs)
+    # target_coord = get_coordinate(Names, blocking_fp_axes, target_idx)
+    target_coord = (Aee=19.0, Aei=13.0, Aie=24.0, Aii=6.0)
     @show "Both: $target_coord"
 
     with_theme(nullcline_theme) do
@@ -151,7 +156,7 @@ let uniform_a = 5.,
     subset_range=saved_lb..saved_ub,
     name_mapping = DEFAULT_NAME_MAPPING,
     session_name="fig_nullclines_differing_failure_fps_5_7_lb=$(saved_lb)_ub=$(saved_ub)_len=$(saved_len)", 
-    session_id = "$(Dates.now())",
+    session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
     plots_subdir = "$(session_name)_$(session_id)";
     if !isdir(plotsdir(plots_subdir))
         mkpath(plotsdir(plots_subdir))

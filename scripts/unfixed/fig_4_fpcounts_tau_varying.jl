@@ -87,7 +87,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
             Symbol("fire→fail")=>blocking_prototype_name
         ),
         session_name = "fig_fpcounts_tau",
-        session_id = "$(Dates.now())",
+        session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
         axis = (width = 800, height = 800),
         bar_theme = Theme(
             fontsize=56,

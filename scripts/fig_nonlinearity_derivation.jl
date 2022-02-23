@@ -1,8 +1,8 @@
 @quickactivate "FailureOfInhibition2022"
 
 using Makie
-using GLMakie; ext_2d = "png"; GLMakie.activate!()
-#using CairoMakie; ext_2d = "svg"; CairoMakie.activate!(); 
+#using GLMakie; ext_2d = "png"; GLMakie.activate!()
+using CairoMakie; ext_2d = "eps"; CairoMakie.activate!(); 
 using DrWatson, Dates
 using Colors
 
@@ -24,7 +24,7 @@ let figure_name = "fig_nonlinearity_derivation",
         )
     ),
     session_name = "fig_nonlinearity_derivation",
-    session_id = "$(Dates.now())",
+    session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
     plots_subdir = "$(session_name)_$(session_id)"
 ; 
 mkpath(plotsdir(plots_subdir))

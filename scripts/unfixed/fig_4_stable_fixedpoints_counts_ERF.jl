@@ -93,7 +93,7 @@ function plot_stable_fixedpoints_counts(mods; saved_lb, saved_ub, saved_len,
         #     save_idxs=nothing, save_on=false, saveat=0.1
         # ),
         session_name = "fig_stable_fixedpoints_counts_erf",
-        session_id = "$(Dates.now())",
+        session_id = "$(Dates.format(Dates.now(), "yyyy_mm_dd-HHMMSS"))",
         axis = (width = 800, height = 800),
         bar_theme = Theme(
             fontsize=56,
