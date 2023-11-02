@@ -5,6 +5,7 @@ using Makie
 using CairoMakie; ext_2d = "eps"; CairoMakie.activate!(); 
 using DrWatson, Dates
 using Colors
+using LaTeXStrings
 
 let figure_name = "fig_nonlinearity_derivation",
     N = 1000,
@@ -59,7 +60,7 @@ for θ ∈ θ_firing
 end
 firing_accum ./= length(θ_firing)
 fig[3,1] = ax_firing_accum = Makie.Axis(fig,
-    xlabel="input", ylabel="prop. firing")
+    xlabel="input", ylabel="firing")
 lines!(ax_firing_accum, xs, firing_accum)
 
 fig[1,2] = ax_failing_example = Makie.Axis(fig)
@@ -88,7 +89,15 @@ hidedecorations!.([ax_failing_example,
 hidexdecorations!.([ax_firing_many, ax_firing_example])
 
 fig[0,1] = Label(fig, "fire", tellwidth=false)
-fig[1,2] = Label(fig, "fire → fail", tellwidth=false)
+fig[0,2] = Label(fig, "fire → fail", tellwidth=false)
+
+noto_sans_bold = assetpath("fonts", "NotoSans-Bold.ttf")
+    label_a1 = fig[1,1,TopLeft()] = Label(fig, "a₁", font=noto_sans_bold, halign=:left)
+    label_b1 = fig[1,2,TopLeft()] = Label(fig, "b₁", font=noto_sans_bold, halign=:left)
+    label_a2 = fig[2,1,TopLeft()] = Label(fig, "a₂", font=noto_sans_bold, halign=:left)
+    label_b2 = fig[2,2,TopLeft()] = Label(fig, "b₂", font=noto_sans_bold, halign=:left)
+    label_a3 = fig[3,1,TopLeft()] = Label(fig, "a₃", font=noto_sans_bold, halign=:left)
+    label_b3 = fig[3,2,TopLeft()] = Label(fig, "b₃", font=noto_sans_bold, halign=:left)
 
 mkpath(subplotsdir())
 save(subplotsdir("$(figure_name).$(ext_2d)"), fig)

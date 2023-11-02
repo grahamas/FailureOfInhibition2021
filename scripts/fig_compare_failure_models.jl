@@ -1,18 +1,17 @@
+"""
+    Produces figure titled "Comparing model fits of synthetic data."
+    (Fig. 3 as of 2023 Nov 1; 40s runtime)
+"""
+
 using Base: NamedTuple
 using DrWatson
 @quickactivate "FailureOfInhibition2022"
 
-# using NeuralModels: AxisIndices
-
 using Dates
-
 using Base.Iterators
 using Optim, Statistics
-
 using CairoMakie,Makie
-
 using NeuralModels
-
 using Memoize
 
 include(srcdir("estimate_params.jl"))
@@ -54,6 +53,7 @@ three_models_order = [#kim,
 three_models_sorter = sorter([model_string_names[name] for name in three_models_order]...)
 
 with_theme(model_comparison_theme) do
+    fig = Figure(resolution=figure_resolution)
     rmse_plt = data(results_df) * mapping(
         :samples => (s -> s.off.μ - s.on.μ) => "Δμ",
         :fits => Optim.minimum => "RMSE",
@@ -68,21 +68,19 @@ with_theme(model_comparison_theme) do
     narrow_transσ_result = nda_dims_getindex(results, dims, (σ_on=σ_on[3end÷4],
         μ_off=0.5, σ_off=σ_off[begin]))
     @show narrow_transσ_result.minimizing_p
-    drawn_fig = draw(rmse_plt)
-    fig = drawn_fig.figure
-    fig.scene.resolution[] = figure_resolution
+    draw!(fig[2,2], rmse_plt)
     #axislegend(Makie.Axis(first(drawn_fig)); position=:lt)
 
     wide_idσ_Δμ = wide_idσ_result.samples.off.μ - wide_idσ_result.samples.on.μ
     wide_idσ_title = "Δμ = $(round(wide_idσ_Δμ,digits=2)), σₒₙ=$(round(wide_idσ_result.samples.on.σ, digits=2))"
-    fig[0,1] = wide_idσ_ax = Makie.Axis(fig, title=wide_idσ_title)
+    fig[1,2] = wide_idσ_ax = Makie.Axis(fig, title=wide_idσ_title)
     @info """$wide_idσ_title
         DoS RMSE: $(Optim.minimum(wide_idσ_result.fits.my))
         Gaussian RMSE: $(Optim.minimum(wide_idσ_result.fits.meijer))"""
 
     wide_transσ_Δμ = wide_transσ_result.samples.off.μ - wide_transσ_result.samples.on.μ
     wide_transσ_title = "Δμ = $(round(wide_transσ_Δμ,digits=2)), σₒₙ=$(round(wide_transσ_result.samples.on.σ, digits=2))"
-    fig[1,0] = wide_transσ_ax = Makie.Axis(fig, title=wide_transσ_title)
+    fig[1,1] = wide_transσ_ax = Makie.Axis(fig, title=wide_transσ_title)
     @info """$wide_transσ_title
         DoS RMSE: $(Optim.minimum(wide_transσ_result.fits.my))
         Gaussian RMSE: $(Optim.minimum(wide_transσ_result.fits.meijer))"""
@@ -112,9 +110,9 @@ with_theme(model_comparison_theme) do
     axs .|> ax -> ax.yticks[] = [0.0, 0.5, 1.0]
 
     #Colorbar(fig[1,2], only(drawn_fig[1,1].axis.scene.plots))
-    display(drawn_fig)
+    display(fig)
 
-    save(plotsdir(plots_subdir, "toy_model_fit.$(file_type)"), drawn_fig)
+    save(plotsdir(plots_subdir, "toy_model_fit.$(file_type)"), fig)
 end
 
 results_df

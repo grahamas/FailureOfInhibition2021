@@ -30,10 +30,12 @@ function plot_nullclines!(fig::Figure, p::AbstractWCMNullclineParams, nullcline_
  
     dus = calculate_field(du_defn, nullcline_axes, p)
     dvs = calculate_field(dv_defn, nullcline_axes, p)
+
+    @info "Generating contours..."
     u_nullclines = Contour.lines(Contour.contour(nullcline_axes..., dus, 0.))
     v_nullclines = Contour.lines(Contour.contour(nullcline_axes..., dvs, 0.))
 
-
+    @info "Generating arrows..."
     if arrows_step !== nothing
         arrow_axis = 0.:arrows_step:1. |> collect
         arrow_axes = [arrow_axis, arrow_axis]
@@ -43,6 +45,7 @@ function plot_nullclines!(fig::Figure, p::AbstractWCMNullclineParams, nullcline_
         arrows!(ax, arrow_axis, arrow_axis, dus, dvs; arrowcolor=strength, linecolor=strength)
     end
 
+    @info "Plotting nullclines..."
     for line in u_nullclines
         xs, ys = Contour.coordinates(line)
         Makie.lines!(ax, xs, ys; 
@@ -58,6 +61,7 @@ function plot_nullclines!(fig::Figure, p::AbstractWCMNullclineParams, nullcline_
     end
 
     if mark_fp
+        @info "Calculating fixedpoints..."
         fixedpoints = calculate_fixedpoints(p, length(nullcline_axes[1]))
         stability = fixedpoint_stability.(Ref(p), fixedpoints)
         stability_marker = getindex.(Ref(NullclineAnalysis.STABILITY_MARKERS), stability)
